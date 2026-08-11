@@ -1,0 +1,7 @@
+/.bin/
+/.build/
+/agent-framework-suite
+/drivers/rust/target/
+/reports/
+__pycache__/
+*.pyc

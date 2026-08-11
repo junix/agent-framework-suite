@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+driver_dir="$(cd "$(dirname "$0")" && pwd)"
+subject_dir="$(cd "$driver_dir/../../../agent-framework" && pwd)"
+exec uv run --project "$subject_dir" python "$driver_dir/driver.py" "$@"
