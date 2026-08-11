@@ -2,12 +2,20 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/junix/agent-framework-suite/internal/suite"
 )
+
+type failingWriter struct{}
+
+func (failingWriter) Write([]byte) (int, error) {
+	return 0, errors.New("broken output")
+}
 
 func TestVersionAndListDoNotNeedParticipants(t *testing.T) {
 	for _, args := range [][]string{{"version", "--json"}, {"list", "WF-001", "--json"}, {"list", "--select", "WF-001", "--json"}} {
@@ -19,6 +27,16 @@ func TestVersionAndListDoNotNeedParticipants(t *testing.T) {
 		if stdout.Len() == 0 {
 			t.Fatalf("run(%v) produced no output", args)
 		}
+	}
+}
+
+func TestJSONWriteFailureProducesNonzeroExit(t *testing.T) {
+	var stderr bytes.Buffer
+	if code := run([]string{"version", "--json"}, failingWriter{}, &stderr); code == 0 {
+		t.Fatal("expected nonzero exit code")
+	}
+	if !strings.Contains(stderr.String(), "broken output") {
+		t.Fatalf("stderr did not report write failure: %s", stderr.String())
 	}
 }
 

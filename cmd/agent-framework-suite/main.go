@@ -61,7 +61,10 @@ func versionCommand(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if *jsonOutput {
-		writeJSON(stdout, map[string]string{"suite": "agent-framework-suite", "version": suite.SuiteVersion, "contract": suite.ContractVersion})
+		if err := writeJSON(stdout, map[string]string{"suite": "agent-framework-suite", "version": suite.SuiteVersion, "contract": suite.ContractVersion}); err != nil {
+			fmt.Fprintf(stderr, "write JSON: %v\n", err)
+			return 2
+		}
 	} else {
 		fmt.Fprintf(stdout, "agent-framework-suite %s (%s)\n", suite.SuiteVersion, suite.ContractVersion)
 	}
@@ -81,7 +84,10 @@ func doctorCommand(args []string, clients []driver.Client, stdout, stderr io.Wri
 		return 3
 	}
 	if *jsonOutput {
-		writeJSON(stdout, map[string]any{"status": "ready", "contract": suite.ContractVersion, "participants": versions, "cases": len(suite.Catalog())})
+		if err := writeJSON(stdout, map[string]any{"status": "ready", "contract": suite.ContractVersion, "participants": versions, "cases": len(suite.Catalog())}); err != nil {
+			fmt.Fprintf(stderr, "write JSON: %v\n", err)
+			return 2
+		}
 	} else {
 		fmt.Fprintf(stdout, "ready: contract=%s cases=%d\n", suite.ContractVersion, len(suite.Catalog()))
 		for _, participant := range []string{"python", "rust"} {
@@ -121,7 +127,10 @@ func listCommand(args []string, stdout, stderr io.Writer) int {
 		items = append(items, listItem{ID: item.ID, Name: item.Name, Tags: item.Tags, Participants: []string{"python", "rust"}, Timeout: item.Timeout.String()})
 	}
 	if *jsonOutput {
-		writeJSON(stdout, items)
+		if err := writeJSON(stdout, items); err != nil {
+			fmt.Fprintf(stderr, "write JSON: %v\n", err)
+			return 2
+		}
 	} else {
 		for _, item := range items {
 			fmt.Fprintf(stdout, "%s\t%s\t%s\t%s\n", item.ID, item.Name, strings.Join(item.Tags, ","), item.Timeout)
@@ -181,7 +190,10 @@ func runCommand(args []string, clients []driver.Client, stdout, stderr io.Writer
 		}
 	}
 	if *jsonOutput {
-		writeJSON(stdout, report)
+		if err := writeJSON(stdout, report); err != nil {
+			fmt.Fprintf(stderr, "write JSON: %v\n", err)
+			return 2
+		}
 	} else {
 		for _, item := range report.Cases {
 			fmt.Fprintf(stdout, "%s %s parity=%s\n", strings.ToUpper(item.Status), item.ID, item.Parity)
@@ -235,10 +247,10 @@ func intersperseFlags(args []string, booleans, valued map[string]bool) []string 
 	return append(options, positionals...)
 }
 
-func writeJSON(writer io.Writer, value any) {
+func writeJSON(writer io.Writer, value any) error {
 	encoder := json.NewEncoder(writer)
 	encoder.SetIndent("", "  ")
-	_ = encoder.Encode(value)
+	return encoder.Encode(value)
 }
 
 func writeReport(path string, report suite.Report) error {

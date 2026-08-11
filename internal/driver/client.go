@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"io"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -90,10 +91,14 @@ func decodeOne(raw string, target any) error {
 		return err
 	}
 	var extra any
-	if err := decoder.Decode(&extra); err == nil {
+	switch err := decoder.Decode(&extra); {
+	case err == io.EOF:
+		return nil
+	case err == nil:
 		return fmt.Errorf("more than one JSON value")
+	default:
+		return fmt.Errorf("invalid trailing data: %w", err)
 	}
-	return nil
 }
 
 type limitWriter struct {
