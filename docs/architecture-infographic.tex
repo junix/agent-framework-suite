@@ -1,0 +1,335 @@
+% architecture-infographic.tex — Agent Framework Suite architecture infographic
+% Compile: python3 /Users/junix/.codex/skills/create-tikz-infographic/scripts/render_tikz.py \
+%   docs/architecture-infographic.tex --out-dir /tmp/tikz-agent-suite --engine xelatex --dpi 300 --svg
+\documentclass[border=12pt,varwidth=16cm]{standalone}
+\usepackage[UTF8,fontset=none]{ctex}
+\IfFontExistsTF{Source Han Serif SC}{
+  \setmainfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setsansfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setCJKmainfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setCJKsansfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+}{
+  \PackageWarningNoLine{tikz-infographic}{Source Han Serif SC not found; using Fandol}
+  \setCJKmainfont[BoldFont={FandolSong-Bold}]{FandolSong-Regular}
+  \setCJKsansfont[BoldFont={FandolHei-Bold}]{FandolHei-Regular}
+}
+\IfFontExistsTF{Sarasa Mono SC}{
+  \setmonofont{Sarasa Mono SC}
+  \setCJKmonofont{Sarasa Mono SC}
+}{
+  \PackageWarningNoLine{tikz-infographic}{Sarasa Mono SC not found; using TeX defaults}
+  \setmonofont{Latin Modern Mono}
+  \setCJKmonofont{FandolFang-Regular}
+}
+
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,backgrounds,calc,fit,positioning}
+
+% ── Use showcase.sty color and style tokens ─────────────────────────────
+\input{styles/showcase}
+
+% ── Project-specific styles ─────────────────────────────────────────────
+\tikzset{
+  suite/.style={
+    showcase/node, fill=Ocean!12, draw=Ocean, line width=1pt,
+    minimum width=42mm, minimum height=12mm
+  },
+  driver/.style={
+    showcase/node, fill=Sky!18, draw=Sky, line width=.9pt,
+    minimum width=34mm, minimum height=11mm
+  },
+  framework/.style={
+    showcase/node, fill=Fog!60, draw=Slate!55, line width=.8pt,
+    minimum width=34mm, minimum height=11mm
+  },
+  actor/.style={
+    showcase/node, fill=PaperDeep, draw=Slate!50, line width=.8pt,
+    minimum width=30mm, minimum height=10mm, rounded corners=4mm
+  },
+  component/.style={
+    showcase/node, fill=white, draw=Ocean!40, line width=.8pt,
+    minimum width=28mm, minimum height=9mm
+  },
+  boundary/.style={
+    draw=Slate!40, densely dashed, line width=.8pt, rounded corners=3mm, inner sep=5mm
+  },
+  pill/.style={
+    showcase/pill, fill=Mint, text=Ocean
+  },
+  tag/.style={
+    showcase/pill, fill=Sky!20, text=Ocean, minimum height=5mm, inner xsep=2mm
+  },
+  section label/.style={
+    showcase/eyebrow, anchor=west
+  },
+  section title/.style={
+    showcase/title, anchor=west
+  },
+  section desc/.style={
+    showcase/subtitle, anchor=west
+  },
+  legend item/.style={
+    font=\scriptsize, text=Slate
+  },
+  phase box/.style={
+    showcase/card, inner sep=4mm, minimum width=14cm
+  }
+}
+
+\newcommand{\SectionHeader}[3]{%
+  \node[section label] at (0,#1) {#2};
+  \pgfmathsetmacro{\tmpy}{#1-0.52}
+  \node[section title] at (0,\tmpy) {#3};
+}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+% ── Page background ─────────────────────────────────────────────────────
+\begin{pgfonlayer}{page background}
+  \fill[Paper,rounded corners=2mm] (-.6,-63.2) rectangle (15.6,1.2);
+\end{pgfonlayer}
+
+% ═══════════════════════════════════════════════════════════════════════
+% SECTION 1: System Context
+% ═══════════════════════════════════════════════════════════════════════
+\SectionHeader{0.4}{PART 1 · 系统上下文}{Agent Framework Suite}
+
+\node[font=\small,text=Slate,anchor=west,text width=14cm] at (0,-.65)
+  {跨语言端到端一致性测试套件：同时驱动 Python 与 Rust 工作流引擎，验证行为相同。};
+
+% Actors
+\node[actor] (user) at (7.5, -2.0) {用户 / CI};
+
+% Suite (central)
+\node[suite] (suite) at (7.5, -4.0) {\textbf{Agent Framework Suite}\\[-1pt]{\small Go CLI · 用例目录 · 验证器}};
+
+% Drivers
+\node[driver] (py-drv) at (3.0, -6.2) {\textbf{Python Driver}\\[-1pt]{\scriptsize driver.py}};
+\node[driver] (rs-drv) at (12.0, -6.2) {\textbf{Rust Driver}\\[-1pt]{\scriptsize main.rs}};
+
+% Frameworks (external)
+\node[framework] (py-fw) at (3.0, -8.4) {agent-framework\\[-1pt]{\scriptsize Python 库}};
+\node[framework] (rs-fw) at (12.0, -8.4) {agent-framework-rs\\[-1pt]{\scriptsize Rust 库}};
+
+% Catalog
+\node[component] (catalog) at (12.5, -3.3) {用例目录 / Oracle\\[-1pt]{\scriptsize 10 个 WF-NNN}};
+
+% Trust boundary
+\begin{scope}[on background layer]
+  \node[boundary, fit=(py-drv)(rs-drv)(py-fw)(rs-fw)] (iso) {};
+\end{scope}
+\node[font=\scriptsize, text=Slate!70, anchor=north west] at ($(iso.north west)+(2mm,-1mm)$) {隔离子进程边界};
+
+% Edges
+\draw[showcase/flow] (user) -- node[showcase/node,fill=white,draw=Fog,minimum height=6mm,font=\scriptsize,inner sep=1.5pt]{just check} (suite);
+\draw[showcase/flow] (suite) -| node[near start,above,font=\scriptsize,text=Slate]{subprocess} (py-drv);
+\draw[showcase/flow] (suite) -| node[near start,above,font=\scriptsize,text=Slate]{subprocess} (rs-drv);
+\draw[showcase/softflow] (suite) -- (catalog);
+\draw[showcase/softflow] (py-drv) -- node[left,font=\scriptsize,text=Slate]{公开 API} (py-fw);
+\draw[showcase/softflow] (rs-drv) -- node[right,font=\scriptsize,text=Slate]{公开 API} (rs-fw);
+
+% Parity arc
+\coordinate (parity-l) at ($(py-drv.south)+(0,-.5)$);
+\coordinate (parity-r) at ($(rs-drv.south)+(0,-.5)$);
+\draw[showcase/data, densely dashed] (py-drv.south) -- (parity-l) -| node[below,font=\scriptsize\bfseries,text=Ocean,fill=Paper,inner sep=1pt]{parity 比对} (parity-r) -- (rs-drv.south);
+
+
+% ═══════════════════════════════════════════════════════════════════════
+% SECTION 2: Internal Architecture
+% ═══════════════════════════════════════════════════════════════════════
+\SectionHeader{-11.5}{PART 2 · 内部架构}{三层组件}
+
+\node[font=\small,text=Slate,anchor=west,text width=14cm] at (0,-12.55)
+  {自上而下：CLI 分发命令、Suite 调度用例与验证、Driver 隔离子进程调用框架。};
+
+% CLI Layer
+\begin{scope}[on background layer]
+  \node[phase box, fill=Sky!6, minimum height=2.0cm, anchor=north west] at (0,-13.2) (cli-layer) {};
+\end{scope}
+\node[font=\scriptsize\bfseries,text=Teal,anchor=north west] at (0.3,-13.35) {CLI 层};
+
+\node[component, fill=Sky!12, draw=Sky!60, minimum width=38mm] (main-go) at (3.5,-14.4) {\textbf{main.go}\\[-1pt]{\scriptsize flag · 命令分发 · 退出码}};
+\node[font=\scriptsize,text=Slate,anchor=west] at (6.0,-14.4) {4 个子命令：doctor / list / run / version};
+
+% Suite Layer
+\begin{scope}[on background layer]
+  \node[phase box, fill=Ocean!5, minimum height=3.4cm, anchor=north west] at (0,-15.6) (suite-layer) {};
+\end{scope}
+\node[font=\scriptsize\bfseries,text=Teal,anchor=north west] at (0.3,-15.75) {Suite 层（internal/suite）};
+
+\node[component, fill=Ocean!10, draw=Ocean!50, minimum width=32mm] (runner) at (3.0,-16.8) {\textbf{runner.go}\\[-1pt]{\scriptsize 调度 · 验证 · parity}};
+\node[component] (catalog-go) at (3.0,-18.2) {catalog.go\\[-1pt]{\scriptsize 10 个用例定义}};
+\node[component] (selector-go) at (9.5,-16.8) {selector.go\\[-1pt]{\scriptsize ID / 名称 / tag}};
+\node[component] (types-go) at (9.5,-18.2) {types.go\\[-1pt]{\scriptsize Observation · Report}};
+
+% Driver Layer
+\begin{scope}[on background layer]
+  \node[phase box, fill=Mint!30, minimum height=2.0cm, anchor=north west] at (0,-19.4) (driver-layer) {};
+\end{scope}
+\node[font=\scriptsize\bfseries,text=Teal,anchor=north west] at (0.3,-19.55) {Driver 层（internal/driver）};
+
+\node[component, fill=Mint!60, draw=Teal!40, minimum width=38mm] (client-go) at (3.5,-20.6) {\textbf{client.go}\\[-1pt]{\scriptsize 子进程 · JSON · 限流}};
+
+\node[font=\scriptsize,text=Slate,anchor=west] at (6.0,-20.6) {临时 HOME · 固定 PATH · UTC · 64KB};
+
+% Subprocess drivers
+\coordinate (sub-sw) at (-.3,-22.6);
+\coordinate (sub-ne) at (15,-21.4);
+\begin{scope}[on background layer]
+  \node[boundary, fit=(sub-sw)(sub-ne)] (sub-boundary) {};
+\end{scope}
+\node[font=\scriptsize,text=Slate!70,anchor=north west] at ($(sub-boundary.north west)+(2mm,-1.2mm)$) {隔离子进程};
+
+\node[framework, minimum width=34mm] (py-drv2) at (3.5,-22.0) {driver.py · Python};
+\node[framework, minimum width=34mm] (rs-drv2) at (11.5,-22.0) {main.rs · Rust};
+
+% Edges between layers
+\draw[showcase/flow] (main-go.south) -- (runner.north);
+\draw[showcase/softflow] (runner.south) -- (catalog-go.north);
+\draw[showcase/flow] (client-go.north) -- ++(0,.7) -| (runner.south east);
+\draw[showcase/flow] (client-go.south west) -- ++(0,-.45) -| (py-drv2.north);
+\draw[showcase/flow] (client-go.south east) -- ++(0,-.45) -| (rs-drv2.north);
+
+
+% ═══════════════════════════════════════════════════════════════════════
+% SECTION 3: Runtime Data Flow
+% ═══════════════════════════════════════════════════════════════════════
+\SectionHeader{-25.0}{PART 3 · 运行时数据流}{一个用例的生命周期}
+
+\node[font=\small,text=Slate,anchor=west,text width=14cm] at (0,-26.05)
+  {选中用例\,$\rightarrow$\,两个子进程\,$\rightarrow$\,框架调用\,$\rightarrow$\,归一化观测\,$\rightarrow$\,oracle 验证\,$\rightarrow$\,parity 比对。};
+
+% Top row: horizontal flow
+\node[suite, minimum width=26mm, minimum height=10mm, fill=Ocean!8, draw=Ocean!50] (f-select) at (1.5,-27.5) {选中用例};
+\node[suite, minimum width=26mm, minimum height=10mm, fill=Sky!10, draw=Sky!50] (f-spawn) at (5.0,-27.5) {启动子进程};
+\node[suite, minimum width=28mm, minimum height=10mm, fill=Fog!60, draw=Slate!40] (f-call) at (8.8,-27.5) {调用框架 API};
+\node[suite, minimum width=26mm, minimum height=10mm, fill=Ocean!8, draw=Ocean!50] (f-obs) at (12.5,-27.5) {归一化观测};
+
+% Bottom row: validation
+\node[suite, minimum width=30mm, minimum height=10mm, fill=Teal!10, draw=Teal!50] (f-oracle) at (4.2,-29.8) {Oracle 验证};
+\node[suite, minimum width=30mm, minimum height=10mm, fill=Ocean!10, draw=Ocean!50] (f-parity) at (8.8,-29.8) {Parity 比对};
+\node[suite, minimum width=28mm, minimum height=10mm, fill=Coral!12, draw=Coral!50] (f-result) at (12.5,-29.8) {CaseResult};
+
+% Fan-out indicator
+\node[tag] at (5.0,-28.4) {×2（Py + Rs）};
+
+% Edges
+\draw[showcase/flow] (f-select) -- (f-spawn);
+\draw[showcase/flow] (f-spawn) -- (f-call);
+\draw[showcase/flow] (f-call) -- (f-obs);
+\draw[showcase/data] (f-obs.south) -- ++(0,-.5) -| (f-oracle.north);
+\draw[showcase/flow] (f-oracle) -- (f-parity);
+\draw[showcase/flow] (f-parity) -- (f-result);
+
+% Annotations
+\node[font=\scriptsize,text=Slate,anchor=north,text width=3.5cm,align=center] at (f-select.south |- 0,-28.7)
+  {从 catalog.go 的 10 个用例中按 selector 选中};
+\node[font=\scriptsize,text=Slate,anchor=north,text width=3.5cm,align=center] at (f-call.south |- 0,-28.7)
+  {driver 调用各自框架的 WorkflowBuilder 公开 API};
+\node[font=\scriptsize,text=Slate,anchor=north,text width=3cm,align=center] at (f-result.south |- 0,-31.1)
+  {exit 0 全部通过\\exit 1 有失败};
+
+
+% ═══════════════════════════════════════════════════════════════════════
+% SECTION 4: Case Matrix
+% ═══════════════════════════════════════════════════════════════════════
+\SectionHeader{-33.5}{PART 4 · 用例矩阵}{10 个必过用例}
+
+\node[font=\small,text=Slate,anchor=west,text width=14cm] at (0,-34.55)
+  {覆盖 workflow-core/v1 契约的全部公开能力。};
+
+% Case boxes in two columns
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c01) at (0.2,-35.6) {\textbf{WF-001}\enspace chain\_happy\hfill core};
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c02) at (0.2,-36.6) {\textbf{WF-002}\enspace build\_missing\_start\hfill validation};
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c03) at (0.2,-37.6) {\textbf{WF-003}\enspace max\_iterations\hfill runtime};
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c04) at (0.2,-38.6) {\textbf{WF-004}\enspace fan\_out\_fan\_in\hfill routing};
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c05) at (0.2,-39.6) {\textbf{WF-005}\enspace fresh\_run\_isolation\hfill state};
+
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c06) at (8.0,-35.6) {\textbf{WF-006}\enspace switch\_default\_position\hfill routing};
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c07) at (8.0,-36.6) {\textbf{WF-007}\enspace checkpoint\_resume\hfill checkpoint};
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c08) at (8.0,-37.6) {\textbf{WF-008}\enspace checkpoint\_graph\_mismatch\hfill checkpoint};
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c09) at (8.0,-38.6) {\textbf{WF-009}\enspace request\_partial\_response\hfill request};
+\node[component, fill=Ocean!8, draw=Ocean!30, minimum width=62mm, minimum height=8mm, font=\scriptsize, anchor=west]
+  (c10) at (8.0,-39.6) {\textbf{WF-010}\enspace request\_batch\_atomicity\hfill request};
+
+% Tag legend
+\node[tag, fill=Teal!18, text=Teal, minimum width=14mm, font=\tiny\bfseries] at (2.0,-40.8) {core};
+\node[tag, fill=Coral!15, text=Coral!80!black, minimum width=18mm, font=\tiny\bfseries] at (4.2,-40.8) {validation};
+\node[tag, fill=Sky!18, text=Sky!70!black, minimum width=18mm, font=\tiny\bfseries] at (6.6,-40.8) {routing};
+\node[tag, fill=Gold!25, text=Gold!60!black, minimum width=18mm, font=\tiny\bfseries] at (9.0,-40.8) {checkpoint};
+\node[tag, fill=Indigo!15, text=Indigo, minimum width=18mm, font=\tiny\bfseries] at (11.6,-40.8) {request};
+
+
+% ═══════════════════════════════════════════════════════════════════════
+% SECTION 5: Verification Flow
+% ═══════════════════════════════════════════════════════════════════════
+\SectionHeader{-43.2}{PART 5 · 验证机制}{Oracle + Parity 双保险}
+
+\node[font=\small,text=Slate,anchor=west,text width=14cm] at (0,-44.25)
+  {每个观测先过 oracle（和预定义期望比），再做 parity（两端互比）。};
+
+% Left: Oracle path
+\node[component, fill=Teal!10, draw=Teal!50, minimum width=34mm] (obs-py) at (2.5,-45.6) {Python 观测};
+\node[component, fill=Teal!10, draw=Teal!50, minimum width=34mm] (obs-rs) at (12.5,-45.6) {Rust 观测};
+\node[component, fill=Teal!15, draw=Teal!60, minimum width=38mm] (oracle-box) at (7.5,-47.5) {\textbf{Oracle 验证}\\[-1pt]{\scriptsize reflect.DeepEqual}};
+
+% Right: Parity path
+\node[component, fill=Ocean!12, draw=Ocean!50, minimum width=40mm] (parity-box) at (7.5,-49.5) {\textbf{Parity 比对}\\[-1pt]{\scriptsize 去掉 participant 后逐字段}};
+
+% Outcome
+\node[component, fill=Coral!10, draw=Coral!40, minimum width=30mm] (pass-box) at (5.0,-51.3) {passed};
+\node[component, fill=Coral!10, draw=Coral!40, minimum width=30mm] (fail-box) at (10.0,-51.3) {failed + proof};
+
+% Edges
+\draw[showcase/flow] (obs-py.south) -- ++(0,-.4) -| (oracle-box.north west);
+\draw[showcase/flow] (obs-rs.south) -- ++(0,-.4) -| (oracle-box.north east);
+\draw[showcase/flow] (oracle-box) -- node[right,font=\scriptsize,text=Slate]{两端都通过} (parity-box);
+\draw[showcase/flow] (parity-box.south west) -- (pass-box.north);
+\draw[showcase/error] (parity-box.south east) -- (fail-box.north);
+
+% Normalization note
+\node[font=\scriptsize,text=Slate,anchor=north west,text width=5.6cm,align=left] at (0.2,-52.3)
+  {\textbf{归一化规则：}驱动抹平 UUID、时间戳、原生异常名；outcome、terminal\_state、outputs 等业务信号保留原样。};
+
+% Isolation note
+\node[font=\scriptsize,text=Slate,anchor=north west,text width=5.6cm,align=left] at (8.2,-52.3)
+  {\textbf{隔离约束：}临时 HOME、固定 PATH、UTC、64KB 限流。消除环境差异。};
+
+
+% ═══════════════════════════════════════════════════════════════════════
+% SECTION 6: Exit Codes
+% ═══════════════════════════════════════════════════════════════════════
+\SectionHeader{-55.0}{PART 6 · 退出码契约}{4 种退出状态}
+
+\node[component, fill=Teal!15, draw=Teal!50, minimum width=24mm, font=\scriptsize] (ec0) at (1.5,-56.2) {\textbf{0} 全部通过};
+\node[component, fill=Coral!15, draw=Coral!50, minimum width=24mm, font=\scriptsize] (ec1) at (5.5,-56.2) {\textbf{1} 有失败};
+\node[component, fill=Gold!20, draw=Gold!60!black, minimum width=24mm, font=\scriptsize] (ec2) at (9.5,-56.2) {\textbf{2} 参数错误};
+\node[component, fill=Indigo!15, draw=Indigo!50, minimum width=26mm, font=\scriptsize] (ec3) at (13.5,-56.2) {\textbf{3} 驱动缺失};
+
+% Legend
+\draw[showcase/flow] (0,-58.0) -- (1.0,-58.0);
+\node[legend item, anchor=west] at (1.15,-58.0) {主流程};
+\draw[showcase/softflow] (3.0,-58.0) -- (4.0,-58.0);
+\node[legend item, anchor=west] at (4.15,-58.0) {支撑关系};
+\draw[showcase/data, densely dashed] (6.2,-58.0) -- (7.2,-58.0);
+\node[legend item, anchor=west] at (7.35,-58.0) {数据流 / 比对};
+\draw[showcase/error] (9.8,-58.0) -- (10.8,-58.0);
+\node[legend item, anchor=west] at (10.95,-58.0) {失败路径};
+
+\node[font=\scriptsize,text=Slate,anchor=east] at (14.8,-60.0) {workflow-core/v1 · Go 1.25 · hermetic · 无网络依赖};
+\node[font=\scriptsize,text=Slate,anchor=east] at (14.8,-60.7) {生成日期：2026-08-26};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,860 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <script data-code2arch-runtime-bootstrap>
+    window.__docReady = false;
+    window.__docErrors = [];
+    window.addEventListener("error", (event) => {
+      window.__docErrors.push(String(event.error || event.message || "unknown error"));
+    });
+    window.addEventListener("unhandledrejection", (event) => {
+      window.__docErrors.push(String(event.reason || "unhandled rejection"));
+    });
+  </script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent Framework Suite 架构总览</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#fafbfc;--card:#ffffff;--ink:#171a1f;--slate:#656b73;--border:#d7dce3;--blue:#2563eb;--blue-lit:#e8f0fe;--blue-deep:#1d4ed8;--ext-bg:#eef0f2;--flash-bg:#e8f0fe}
+html{font-size:16px;-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang SC","Helvetica Neue","Segoe UI",sans-serif;line-height:1.8;margin:0}
+main{max-width:900px;margin:0 auto;padding:96px 24px 64px}
+h1{font-size:2.5rem;font-weight:700;letter-spacing:-0.02em;line-height:1.2;margin-bottom:8px}
+h2{font-size:1.5rem;font-weight:650;margin-top:96px;margin-bottom:24px;padding-top:24px;border-top:1px solid var(--border)}
+h3{font-size:1.15rem;font-weight:600;margin-top:32px;margin-bottom:12px}
+p,li,dd,td{font-size:16px;line-height:1.8}
+.hero-sub{font-size:1.1rem;color:var(--slate);margin-bottom:16px;max-width:34em}
+.badge{display:inline-block;padding:2px 10px;border-radius:4px;font-size:14px;line-height:1.6;background:var(--blue-lit);color:var(--blue-deep)}
+.badge-row{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+ul.features{list-style:none;padding:0}
+ul.features li{padding:8px 0;border-bottom:1px solid var(--border)}
+ul.features li:last-child{border-bottom:none}
+ul.features strong{color:var(--ink)}
+figure.anim,figure.seq{margin:0;background:var(--card);border:1px solid var(--border);border-radius:12px;padding:24px;overflow-x:auto}
+figure.anim svg,figure.seq svg{display:block;width:100%}
+figcaption{margin-top:12px;padding-top:8px;border-top:1px solid var(--border);color:var(--slate);font-size:14px;line-height:1.6}
+.explanation{font-size:16px;line-height:1.8;margin-top:12px;max-width:34em}
+.explanation strong{font-weight:600}
+.replay{margin-top:12px;padding:6px 14px;border:1px solid var(--blue);border-radius:6px;background:var(--card);color:var(--blue);font-size:14px;cursor:pointer}
+.replay:hover{background:var(--blue-lit)}
+.step-hint{margin:8px 0 0;color:var(--slate);font-size:14px}
+dl.tech{display:grid;grid-template-columns:auto 1fr;gap:8px 16px;margin:16px 0}
+dl.tech dt{font-weight:600;white-space:nowrap}
+dl.tech dd{color:var(--slate)}
+section{margin-bottom:64px}
+a{color:var(--blue)}
+a:hover{text-decoration:underline}
+[data-explains]{cursor:pointer}
+.flash{background:var(--flash-bg);box-shadow:-3px 0 0 var(--blue);transition:background .3s ease}
+:focus-visible{outline:2px solid var(--blue);outline-offset:3px}
+
+/* SVG animation classes */
+.step{opacity:.3;transition:opacity .35s ease;cursor:pointer}
+.step .edge{stroke:#656b73;stroke-width:1.5;fill:none;marker-end:url(#arr-dim);transition:stroke .35s ease,stroke-width .2s ease}
+.step .label-bg{fill:#ffffff;stroke:var(--border);transition:fill .35s ease,stroke .35s ease}
+.step text{font-size:13px;text-anchor:middle;fill:#656b73;transition:fill .35s ease}
+.step.done{opacity:.6}
+.step.cur{opacity:1}
+.step.done .edge,.step.cur .edge{stroke:var(--blue);marker-end:url(#arr-lit)}
+.step.done .label-bg,.step.cur .label-bg{fill:var(--blue-lit);stroke:var(--blue)}
+.step.done text,.step.cur text{fill:var(--blue-deep)}
+.step.cur .edge{stroke-width:2.5}
+.step.cur text{font-weight:600}
+figure.seq.ended .step,figure.anim.ended .step{opacity:1}
+.step.focus .edge{stroke-width:2.5}
+
+/* Node animation (for anim figures) */
+figure.anim .node{opacity:0;transform:translateY(8px);transition:opacity .5s ease,transform .5s ease;transition-delay:calc(var(--i)*80ms)}
+figure.anim.in-view .node{opacity:1;transform:none}
+figure.anim path.edge-line{transition:stroke-dashoffset .8s ease .3s}
+figure.anim.in-view path.edge-line{stroke-dashoffset:0!important}
+.flow-dot{fill:var(--blue)}
+
+/* Focus noise reduction */
+svg.focus-mode .node{opacity:.5;transition:opacity .12s}
+svg.focus-mode .node.hl{opacity:1}
+svg.focus-mode .edge-line{opacity:.3;transition:opacity .12s}
+svg.focus-mode .edge-line.hl{opacity:1}
+
+footer{margin-top:96px;padding-top:24px;border-top:1px solid var(--border);color:var(--slate);font-size:14px;line-height:1.6}
+
+@media(prefers-reduced-motion:reduce){
+  figure.anim .node{opacity:1;transform:none;transition:none}
+  figure.anim path.edge-line{stroke-dashoffset:0!important;transition:none}
+  .flow-dot{display:none}
+  .step{opacity:1;transition:none}
+  .step .edge,.step .label-bg,.step text{transition:none}
+  .flash{transition:none}
+}
+@media print{
+  .replay,.step-hint{display:none}
+  figure.anim .node{opacity:1;transform:none;transition:none}
+  figure.anim path.edge-line{stroke-dashoffset:0!important}
+  .flow-dot{display:none}
+  .step{opacity:1;transition:none}
+  figure.seq.ended .step,figure.anim.ended .step{opacity:1}
+}
+</style>
+<script>document.documentElement.className+=" js";</script>
+<script type="application/json" id="doc-meta">
+{"id":"architecture","title":"Agent Framework Suite 架构总览","status":"draft","audience":"architects",
+ "last_updated":"2026-08-26","owners":[],
+ "revisions":[{"date":"2026-08-26","reason":"首次生成"}]}
+</script>
+</head>
+<body>
+<main>
+<header>
+  <h1>Agent Framework Suite · 架构总览</h1>
+  <p class="hero-sub">跨语言端到端一致性测试套件：同时驱动 Python 与 Rust 工作流引擎，验证两者在同一组用例下的行为完全相同。</p>
+  <div class="badge-row">
+    <span class="badge">workflow-core/v1</span>
+    <span class="badge">Go 1.25</span>
+    <span class="badge">10 个必过用例</span>
+    <span class="badge">hermetic · 无网络</span>
+  </div>
+</header>
+
+<!-- ===== 产品介绍 ===== -->
+<section id="product">
+  <h2>产品介绍</h2>
+  <p><strong>Agent Framework Suite</strong> 是一个封闭式（hermetic）跨语言一致性测试套件。它同时驱动 Python <code>agent-framework</code> 和 Rust <code>agent-framework-rs</code> 两个工作流运行时库，用同一组用例分别调用各自的公开 API，把结果归一化成标准 JSON 观测值，再逐字段比对——两个实现必须输出完全一致，才算通过。</p>
+  <p>这套件服务两种人：一是<strong>框架开发者</strong>，在改了路由逻辑或检查点机制之后跑一遍 <code>just check</code>，就能确认 Python 和 Rust 两端没有分叉；二是<strong>集成工程师</strong>，想知道"换语言后行为一不一样"——答案由这 10 个用例保证。</p>
+  <p>套件本身用 Go 写成一个 CLI，不实现任何工作流逻辑——路由、检查点、迭代控制全部来自被测库。它只做三件事：选用例、调驱动、比结果。所有测试在隔离子进程里完成，不访问网络，不依赖外部服务，30 秒超时兜底。</p>
+</section>
+
+<!-- ===== 功能与特性 ===== -->
+<section id="features">
+  <h2>功能与特性</h2>
+  <ul class="features">
+    <li><strong>双端强制参与</strong> — Python 和 Rust 两个驱动都是必选的；少一个就是基础设施错误，不是跳过。</li>
+    <li><strong>10 个覆盖用例</strong> — 从基础链式执行到检查点恢复、请求原子性，覆盖 <abbr title="workflow-core/v1 是两个框架共同遵守的公开库契约">workflow-core/v1</abbr> 契约的全部公开能力。</li>
+    <li><strong>归一化观测</strong> — 生成的 ID、时间戳、原生异常拼写等不稳定字段由驱动层抹平，只保留可比对的稳定信号。</li>
+    <li><strong>Oracle 验证 + Parity 检查</strong> — 每个用例先对各自的观测值做 oracle 校验，再把两个观测值做逐字段等价比较。</li>
+    <li><strong>封闭执行环境</strong> — 驱动在临时 HOME、固定 PATH、UTC 时区的子进程中运行，输出限制 64KB，不碰网络和凭据。</li>
+    <li><strong>CLI 四命令</strong> — <code>doctor</code> 检查就绪状态，<code>list</code> 列出用例，<code>run</code> 执行测试，<code>version</code> 打印版本。</li>
+    <li><strong>JSON 报告</strong> — <code>--json</code> 输出机器可读的完整报告，包含合约版本、参与者版本、逐用例结果和重跑命令。</li>
+    <li><strong>流式输出</strong> — <code>--stream</code> 把完成的用例逐条写到 stderr，方便长时间运行时观察进度。</li>
+  </ul>
+</section>
+
+<!-- ===== 架构总览图 ===== -->
+<section id="overview">
+  <h2>架构总览</h2>
+  <figure class="anim" id="fig-overview">
+    <svg role="group" aria-label="系统上下文图" viewBox="0 0 800 520" min-width="800">
+      <defs>
+        <marker id="arr-dim" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#656b73"/></marker>
+        <marker id="arr-lit" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2563eb"/></marker>
+        <marker id="arr-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2563eb"/></marker>
+      </defs>
+
+      <!-- User -->
+      <g class="node" style="--i:0" data-node="user" data-explains="product">
+        <rect class="hit" x="310" y="10" width="180" height="50" rx="8" fill="transparent" pointer-events="all"/>
+        <rect x="320" y="15" width="160" height="40" rx="8" fill="#eef0f2" stroke="#9ca3af" stroke-width="1.2"/>
+        <text x="400" y="40" text-anchor="middle" font-size="14" font-weight="600" fill="#171a1f">用户 / CI</text>
+      </g>
+
+      <!-- Suite harness -->
+      <g class="node" style="--i:1" data-node="suite" data-explains="overview-text">
+        <rect class="hit" x="280" y="120" width="240" height="70" rx="8" fill="transparent" pointer-events="all"/>
+        <rect x="285" y="125" width="230" height="60" rx="8" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.8"/>
+        <text x="400" y="148" text-anchor="middle" font-size="14" font-weight="600" fill="#171a1f">Agent Framework Suite</text>
+        <text x="400" y="168" text-anchor="middle" font-size="12" fill="#656b73">Go CLI · 用例目录 · 验证器</text>
+      </g>
+
+      <!-- Python Driver -->
+      <g class="node" style="--i:2" data-node="py-driver" data-explains="py-driver-text">
+        <rect class="hit" x="60" y="260" width="200" height="70" rx="8" fill="transparent" pointer-events="all"/>
+        <rect x="65" y="265" width="190" height="60" rx="8" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="160" y="290" text-anchor="middle" font-size="13" font-weight="600" fill="#171a1f">Python Driver</text>
+        <text x="160" y="308" text-anchor="middle" font-size="11" fill="#656b73">driver.py · subprocess</text>
+      </g>
+
+      <!-- Rust Driver -->
+      <g class="node" style="--i:2" data-node="rs-driver" data-explains="rs-driver-text">
+        <rect class="hit" x="540" y="260" width="200" height="70" rx="8" fill="transparent" pointer-events="all"/>
+        <rect x="545" y="265" width="190" height="60" rx="8" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="640" y="290" text-anchor="middle" font-size="13" font-weight="600" fill="#171a1f">Rust Driver</text>
+        <text x="640" y="308" text-anchor="middle" font-size="11" fill="#656b73">main.rs · subprocess</text>
+      </g>
+
+      <!-- Python Framework -->
+      <g class="node" style="--i:3" data-node="py-fw">
+        <rect class="hit" x="60" y="400" width="200" height="60" rx="8" fill="transparent" pointer-events="all"/>
+        <rect x="65" y="405" width="190" height="50" rx="8" fill="#eef0f2" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="160" y="427" text-anchor="middle" font-size="13" font-weight="600" fill="#171a1f">agent-framework</text>
+        <text x="160" y="443" text-anchor="middle" font-size="11" fill="#656b73">Python 库</text>
+      </g>
+
+      <!-- Rust Framework -->
+      <g class="node" style="--i:3" data-node="rs-fw">
+        <rect class="hit" x="540" y="400" width="200" height="60" rx="8" fill="transparent" pointer-events="all"/>
+        <rect x="545" y="405" width="190" height="50" rx="8" fill="#eef0f2" stroke="#9ca3af" stroke-width="1" stroke-dasharray="4 3"/>
+        <text x="640" y="427" text-anchor="middle" font-size="13" font-weight="600" fill="#171a1f">agent-framework-rs</text>
+        <text x="640" y="443" text-anchor="middle" font-size="11" fill="#656b73">Rust 库</text>
+      </g>
+
+      <!-- Oracle / Catalog -->
+      <g class="node" style="--i:1" data-node="catalog">
+        <rect class="hit" x="570" y="110" width="180" height="55" rx="8" fill="transparent" pointer-events="all"/>
+        <rect x="575" y="115" width="170" height="45" rx="8" fill="#ffffff" stroke="#d7dce3" stroke-width="1"/>
+        <text x="660" y="135" text-anchor="middle" font-size="13" font-weight="600" fill="#171a1f">用例目录 / Oracle</text>
+        <text x="660" y="150" text-anchor="middle" font-size="11" fill="#656b73">10 个 WF-NNN</text>
+      </g>
+
+      <!-- Edges: User → Suite -->
+      <path class="edge-line" d="M400 60 V120" data-from="user" data-to="suite" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr-blue)"/>
+      <text x="412" y="95" font-size="11" fill="#656b73">just check</text>
+
+      <!-- Suite → Python Driver -->
+      <path class="edge-line" d="M320 185 Q200 220 160 260" data-from="suite" data-to="py-driver" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr-blue)"/>
+      <text x="200" y="220" font-size="11" fill="#656b73">subprocess 调用</text>
+
+      <!-- Suite → Rust Driver -->
+      <path class="edge-line" d="M480 185 Q600 220 640 260" data-from="suite" data-to="rs-driver" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr-blue)"/>
+      <text x="555" y="220" font-size="11" fill="#656b73">subprocess 调用</text>
+
+      <!-- Suite ↔ Catalog -->
+      <path class="edge-line" d="M510 145 H570" data-from="suite" data-to="catalog" stroke="#656b73" stroke-width="1" fill="none" marker-end="url(#arr-dim)"/>
+      <text x="535" y="138" font-size="10" fill="#656b73">查询</text>
+
+      <!-- Python Driver → Framework -->
+      <path class="edge-line" d="M160 325 V400" data-from="py-driver" data-to="py-fw" stroke="#656b73" stroke-width="1.2" fill="none" marker-end="url(#arr-dim)"/>
+      <text x="172" y="368" font-size="10" fill="#656b73">公开 API</text>
+
+      <!-- Rust Driver → Framework -->
+      <path class="edge-line" d="M640 325 V400" data-from="rs-driver" data-to="rs-fw" stroke="#656b73" stroke-width="1.2" fill="none" marker-end="url(#arr-dim)"/>
+      <text x="652" y="368" font-size="10" fill="#656b73">公开 API</text>
+
+      <!-- Parity comparison -->
+      <path class="edge-line" d="M160 330 Q400 370 640 330" data-from="py-driver" data-to="rs-driver" stroke="#2563eb" stroke-width="1.2" stroke-dasharray="6 4" fill="none" marker-end="url(#arr-blue)"/>
+      <text x="400" y="375" text-anchor="middle" font-size="11" fill="#2563eb" font-weight="600">parity 比对</text>
+
+      <!-- Trust boundary -->
+      <rect x="45" y="245" width="710" height="230" rx="12" fill="none" stroke="#d7dce3" stroke-width="1.2" stroke-dasharray="6 4"/>
+      <text x="60" y="262" font-size="11" fill="#9ca3af">隔离子进程边界</text>
+    </svg>
+    <figcaption>套件在隔离子进程中同时驱动两个框架，收集归一化观测后做 oracle 验证与 parity 比对。</figcaption>
+  </figure>
+  <p class="explanation" id="overview-text"><strong>Agent Framework Suite</strong> 是整个系统的核心——一个 Go CLI，内含用例目录（10 个必过场景）、验证器和报告生成器。用户通过 <code>just check</code> 或 <code>agent-framework-suite run</code> 发起测试。套件把每个用例翻译成 <code>run CASE_ID</code> 命令，分别发给 Python 和 Rust 两个驱动子进程。驱动调用各自框架的公开 API 产生 <abbr title="workflow-core/v1 标准 JSON 格式，包含 outcome、terminal_state、outputs 等字段">归一化观测</abbr>，套件收到后先对各自的观测做 oracle 校验（预期 outcome 是否匹配），再把两个观测做逐字段 parity 比对。底层的 Python <code>agent-framework</code> 和 Rust <code>agent-framework-rs</code> 是被测对象——套件本身不实现任何工作流逻辑。</p>
+</section>
+
+<!-- ===== 主走查：一次完整测试 ===== -->
+<section id="walkthrough">
+  <h2>主走查：一次 just check</h2>
+  <p>下面走一遍 <code>just check</code> 的完整路径——从敲命令到看到 PASS，经过 6 个环节。</p>
+
+  <figure class="seq" id="fig-walkthrough" data-hint="walk-hint">
+    <svg role="group" aria-label="一次 just check 的完整走查" viewBox="0 0 780 480" min-width="780">
+      <defs>
+        <marker id="arr-dim-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#656b73"/></marker>
+        <marker id="arr-lit-w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2563eb"/></marker>
+      </defs>
+
+      <!-- Step 1: Build -->
+      <g class="step" tabindex="0" aria-label="编译套件和驱动">
+        <path class="edge" d="M100 50 H680" stroke-width="1.5"/>
+        <rect class="label-bg" x="260" y="36" width="260" height="28" rx="5"/>
+        <text x="390" y="55">① 编译套件与 Rust 驱动</text>
+      </g>
+
+      <!-- Step 2: Doctor -->
+      <g class="step" tabindex="0" aria-label="doctor 检查就绪">
+        <path class="edge" d="M100 110 H680" stroke-width="1.5"/>
+        <rect class="label-bg" x="220" y="96" width="340" height="28" rx="5"/>
+        <text x="390" y="115">② doctor 探测两个驱动版本</text>
+      </g>
+
+      <!-- Step 3: For each case -->
+      <g class="step" tabindex="0" aria-label="逐用例驱动子进程">
+        <path class="edge" d="M100 170 H680" stroke-width="1.5"/>
+        <rect class="label-bg" x="230" y="156" width="320" height="28" rx="5"/>
+        <text x="390" y="175">③ 逐用例启动两个子进程</text>
+      </g>
+
+      <!-- Step 4: Collect observations -->
+      <g class="step" tabindex="0" aria-label="收集归一化观测">
+        <path class="edge" d="M100 230 H680" stroke-width="1.5"/>
+        <rect class="label-bg" x="220" y="216" width="340" height="28" rx="5"/>
+        <text x="390" y="235">④ 收集两个驱动的 JSON 观测值</text>
+      </g>
+
+      <!-- Step 5: Validate + Parity -->
+      <g class="step" tabindex="0" aria-label="oracle 验证与 parity 比对">
+        <path class="edge" d="M100 290 H680" stroke-width="1.5"/>
+        <rect class="label-bg" x="200" y="276" width="380" height="28" rx="5"/>
+        <text x="390" y="295">⑤ Oracle 验证 + 两端 parity 逐字段比对</text>
+      </g>
+
+      <!-- Step 6: Report -->
+      <g class="step" tabindex="0" aria-label="输出报告和退出码">
+        <path class="edge" d="M100 350 H680" stroke-width="1.5"/>
+        <rect class="label-bg" x="230" y="336" width="320" height="28" rx="5"/>
+        <text x="390" y="355">⑥ 生成 JSON 报告并设置退出码</text>
+      </g>
+
+      <!-- Labels on left -->
+      <text x="70" y="55" text-anchor="end" font-size="12" fill="#9ca3af">CLI</text>
+      <text x="70" y="115" text-anchor="end" font-size="12" fill="#9ca3af">CLI</text>
+      <text x="70" y="175" text-anchor="end" font-size="12" fill="#9ca3af">Runner</text>
+      <text x="70" y="235" text-anchor="end" font-size="12" fill="#9ca3af">Driver</text>
+      <text x="70" y="295" text-anchor="end" font-size="12" fill="#9ca3af">Runner</text>
+      <text x="70" y="355" text-anchor="end" font-size="12" fill="#9ca3af">CLI</text>
+
+      <!-- Components on right -->
+      <text x="710" y="55" font-size="12" fill="#9ca3af">main.go</text>
+      <text x="710" y="115" font-size="12" fill="#9ca3af">client.go</text>
+      <text x="710" y="175" font-size="12" fill="#9ca3af">runner.go</text>
+      <text x="710" y="235" font-size="12" fill="#9ca3af">client.go</text>
+      <text x="710" y="295" font-size="12" fill="#9ca3af">runner.go</text>
+      <text x="710" y="355" font-size="12" fill="#9ca3af">main.go</text>
+
+      <!-- Outcome indicator -->
+      <rect x="300" y="410" width="180" height="40" rx="8" fill="none" stroke="#d7dce3" stroke-width="1"/>
+      <text x="390" y="435" text-anchor="middle" font-size="14" font-weight="600" fill="#171a1f">exit 0 = 全部通过</text>
+    </svg>
+    <figcaption>主走查「一次 check」：从编译到报告，套件经 6 步完成一轮端到端验收。</figcaption>
+  </figure>
+  <button class="replay" type="button">▶ 重放动效</button>
+  <p class="step-hint" id="walk-hint">等待进场…</p>
+
+  <div class="explanation">
+    <p><strong>① 编译</strong> — <code>just check</code> 先编译 Go 套件二进制和 Rust 驱动。Python 驱动是脚本，不需要编译。</p>
+    <p><strong>② doctor</strong> — 套件向两个驱动各发一次 <code>version</code> 命令，确认它们都在、能响应、身份匹配。任何一方超时或身份不一致，退出码 3。</p>
+    <p><strong>③ 驱动子进程</strong> — <code>internal/suite/runner.go</code> 遍历用例目录（<code>catalog.go</code> 里的 10 个 WF-NNN），对每个用例分别调用两个驱动的 <code>run CASE_ID</code>。子进程在临时 HOME、固定 PATH、UTC 环境中运行，30 秒超时。</p>
+    <p><strong>④ 收集观测</strong> — 每个驱动把框架的返回值包装成 <code>workflow-core/v1</code> 标准 JSON（包含 outcome、terminal_state、outputs、requests、checkpoints、error、evidence），写到 stdout。套件通过 <code>client.go</code> 的 <code>decodeOne</code> 解码，输出限制 64KB。</p>
+    <p><strong>⑤ 验证</strong> — <code>runner.go</code> 的 <code>ValidateObservation</code> 先把每个观测与目录里的 <code>Expected</code> 做 <code>reflect.DeepEqual</code>（oracle 检查）。两个观测都通过后，<code>Equivalent</code> 做 parity 比对：去掉 participant 字段，剩余必须逐字节一致。</p>
+    <p><strong>⑥ 报告</strong> — 全部用例跑完，CLI 输出 passed/failed/total 摘要。JSON 报告包含每个用例的参与者结果、parity 状态、proof 字段和重跑命令。退出码 0 表示全部通过。</p>
+  </div>
+</section>
+
+<!-- ===== 组件视图 ===== -->
+<section id="components">
+  <h2>组件视图</h2>
+  <figure class="anim" id="fig-components">
+    <svg role="group" aria-label="内部组件分层图" viewBox="0 0 700 440" min-width="700">
+      <defs>
+        <marker id="arr-dim-c" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#656b73"/></marker>
+      </defs>
+
+      <!-- CLI layer -->
+      <rect x="30" y="15" width="640" height="70" rx="8" fill="#f8f9fb" stroke="#d7dce3" stroke-width="0.8"/>
+      <text x="50" y="35" font-size="12" fill="#9ca3af" font-weight="600">CLI 层</text>
+
+      <g class="node" style="--i:0" data-node="main">
+        <rect class="hit" x="50" y="40" width="180" height="35" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="55" y="43" width="170" height="29" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="140" y="63" text-anchor="middle" font-size="13" font-weight="600" fill="#171a1f">main.go</text>
+      </g>
+      <text x="250" y="63" font-size="11" fill="#656b73">flag 解析 · 命令分发 · JSON 输出 · 退出码</text>
+
+      <!-- Suite layer -->
+      <rect x="30" y="100" width="640" height="140" rx="8" fill="#f8f9fb" stroke="#d7dce3" stroke-width="0.8"/>
+      <text x="50" y="120" font-size="12" fill="#9ca3af" font-weight="600">Suite 层（internal/suite）</text>
+
+      <g class="node" style="--i:1" data-node="runner">
+        <rect class="hit" x="50" y="130" width="140" height="35" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="55" y="133" width="130" height="29" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="120" y="153" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">runner.go</text>
+      </g>
+      <text x="210" y="153" font-size="11" fill="#656b73">用例调度 · 观测验证 · parity 比对 · 报告</text>
+
+      <g class="node" style="--i:1" data-node="catalog">
+        <rect class="hit" x="50" y="175" width="140" height="35" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="55" y="178" width="130" height="29" rx="6" fill="#ffffff" stroke="#d7dce3" stroke-width="1"/>
+        <text x="120" y="198" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">catalog.go</text>
+      </g>
+      <text x="210" y="198" font-size="11" fill="#656b73">10 个用例定义 · Expected 观测 · 超时策略</text>
+
+      <g class="node" style="--i:1" data-node="selector">
+        <rect class="hit" x="370" y="130" width="140" height="35" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="375" y="133" width="130" height="29" rx="6" fill="#ffffff" stroke="#d7dce3" stroke-width="1"/>
+        <text x="440" y="153" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">selector.go</text>
+      </g>
+      <text x="520" y="153" font-size="11" fill="#656b73">ID / 名称 / tag 筛选</text>
+
+      <g class="node" style="--i:1" data-node="types">
+        <rect class="hit" x="370" y="175" width="140" height="35" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="375" y="178" width="130" height="29" rx="6" fill="#ffffff" stroke="#d7dce3" stroke-width="1"/>
+        <text x="440" y="198" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">types.go</text>
+      </g>
+      <text x="520" y="198" font-size="11" fill="#656b73">Observation · Case · Report 类型</text>
+
+      <!-- Driver layer -->
+      <rect x="30" y="255" width="640" height="80" rx="8" fill="#f8f9fb" stroke="#d7dce3" stroke-width="0.8"/>
+      <text x="50" y="275" font-size="12" fill="#9ca3af" font-weight="600">Driver 层（internal/driver）</text>
+
+      <g class="node" style="--i:2" data-node="client">
+        <rect class="hit" x="50" y="283" width="140" height="35" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="55" y="286" width="130" height="29" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="120" y="306" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">client.go</text>
+      </g>
+      <text x="210" y="306" font-size="11" fill="#656b73">子进程管理 · JSON 解码 · 环境隔离 · 64KB 限流</text>
+
+      <!-- Subprocess boundary -->
+      <rect x="30" y="350" width="640" height="75" rx="8" fill="none" stroke="#d7dce3" stroke-width="1.2" stroke-dasharray="6 4"/>
+      <text x="50" y="370" font-size="11" fill="#9ca3af">隔离子进程（驱动）</text>
+
+      <g class="node" style="--i:3" data-node="py-drv">
+        <rect class="hit" x="60" y="380" width="200" height="32" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="65" y="383" width="190" height="26" rx="6" fill="#eef0f2" stroke="#9ca3af" stroke-width="1"/>
+        <text x="160" y="401" text-anchor="middle" font-size="12" fill="#171a1f">driver.py · Python</text>
+      </g>
+
+      <g class="node" style="--i:3" data-node="rs-drv">
+        <rect class="hit" x="440" y="380" width="200" height="32" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="445" y="383" width="190" height="26" rx="6" fill="#eef0f2" stroke="#9ca3af" stroke-width="1"/>
+        <text x="540" y="401" text-anchor="middle" font-size="12" fill="#171a1f">main.rs · Rust</text>
+      </g>
+
+      <!-- Edges -->
+      <path class="edge-line" d="M140 78 V130" data-from="main" data-to="runner" stroke="#656b73" stroke-width="1" fill="none" marker-end="url(#arr-dim-c)"/>
+      <path class="edge-line" d="M140 162 V175" data-from="runner" data-to="catalog" stroke="#656b73" stroke-width="1" fill="none" marker-end="url(#arr-dim-c)"/>
+      <path class="edge-line" d="M120 210 V283" data-from="runner" data-to="client" stroke="#656b73" stroke-width="1" fill="none" marker-end="url(#arr-dim-c)"/>
+      <path class="edge-line" d="M120 318 V380" data-from="client" data-to="py-drv" stroke="#656b73" stroke-width="1" fill="none" marker-end="url(#arr-dim-c)"/>
+      <path class="edge-line" d="M210 310 Q370 340 540 380" data-from="client" data-to="rs-drv" stroke="#656b73" stroke-width="1" fill="none" marker-end="url(#arr-dim-c)"/>
+    </svg>
+    <figcaption>自上而下三层：CLI 分发命令，Suite 调度用例与验证，Driver 隔离子进程调用框架。</figcaption>
+  </figure>
+  <p class="explanation" id="comp-text"><strong>CLI 层</strong>由 <code>main.go</code> 组成，负责解析 <code>--python-driver</code> 和 <code>--rust-driver</code> 路径、分发 <code>doctor</code> / <code>list</code> / <code>run</code> / <code>version</code> 四个子命令、控制 JSON 输出和退出码。退出码 0/1/2/3 分别对应全通过、有失败、参数错误、驱动缺失。<strong>Suite 层</strong>是业务核心：catalog.go 定义了 10 个用例及其 Expected 观测值，selector.go 支持按 ID、名称前缀、标签筛选用例，runner.go 遍历选中的用例并对每个用例调用两个驱动、验证结果、做 parity 比对。<strong>Driver 层</strong>把子进程管理封装在 client.go 里：创建临时 HOME 目录、设定固定环境变量、限制输出 64KB、从 stdout 解码恰好一个 JSON 对象。隔离子进程边界以下是两个原生驱动——Python 驱动是脚本，Rust 驱动是编译好的二进制——它们各自调用框架的公开 API，不实现任何工作流逻辑。</p>
+</section>
+
+<!-- ===== 数据流图 ===== -->
+<section id="data-flow">
+  <h2>数据流：一个用例的生命周期</h2>
+  <figure class="anim" id="fig-dataflow">
+    <svg role="group" aria-label="单个用例的数据流" viewBox="0 0 750 300" min-width="750">
+      <defs>
+        <marker id="arr-dim-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#656b73"/></marker>
+        <marker id="arr-blue-d" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0 L10 5 L0 10 z" fill="#2563eb"/></marker>
+      </defs>
+
+      <!-- Nodes -->
+      <g class="node" style="--i:0" data-node="case-select">
+        <rect class="hit" x="15" y="20" width="120" height="45" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="20" y="23" width="110" height="39" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="75" y="38" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">选中用例</text>
+        <text x="75" y="53" text-anchor="middle" font-size="10" fill="#656b73">catalog.go</text>
+      </g>
+
+      <g class="node" style="--i:1" data-node="subprocess">
+        <rect class="hit" x="180" y="20" width="130" height="45" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="185" y="23" width="120" height="39" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="245" y="38" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">启动子进程</text>
+        <text x="245" y="53" text-anchor="middle" font-size="10" fill="#656b73">client.go</text>
+      </g>
+
+      <g class="node" style="--i:2" data-node="framework-call">
+        <rect class="hit" x="355" y="20" width="130" height="45" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="360" y="23" width="120" height="39" rx="6" fill="#eef0f2" stroke="#9ca3af" stroke-width="1"/>
+        <text x="420" y="38" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">调用框架 API</text>
+        <text x="420" y="53" text-anchor="middle" font-size="10" fill="#656b73">driver.*</text>
+      </g>
+
+      <g class="node" style="--i:3" data-node="observation">
+        <rect class="hit" x="530" y="20" width="130" height="45" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="535" y="23" width="120" height="39" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="595" y="38" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">归一化观测</text>
+        <text x="595" y="53" text-anchor="middle" font-size="10" fill="#656b73">JSON stdout</text>
+      </g>
+
+      <!-- Bottom row -->
+      <g class="node" style="--i:4" data-node="oracle">
+        <rect class="hit" x="180" y="140" width="130" height="45" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="185" y="143" width="120" height="39" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="245" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">Oracle 验证</text>
+        <text x="245" y="173" text-anchor="middle" font-size="10" fill="#656b73">reflect.DeepEqual</text>
+      </g>
+
+      <g class="node" style="--i:5" data-node="parity">
+        <rect class="hit" x="355" y="140" width="130" height="45" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="360" y="143" width="120" height="39" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="420" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">Parity 比对</text>
+        <text x="420" y="173" text-anchor="middle" font-size="10" fill="#656b73">Equivalent()</text>
+      </g>
+
+      <g class="node" style="--i:6" data-node="result">
+        <rect class="hit" x="530" y="140" width="130" height="45" rx="6" fill="transparent" pointer-events="all"/>
+        <rect x="535" y="143" width="120" height="39" rx="6" fill="#e8f0fe" stroke="#2563eb" stroke-width="1.2"/>
+        <text x="595" y="158" text-anchor="middle" font-size="12" font-weight="600" fill="#171a1f">CaseResult</text>
+        <text x="595" y="173" text-anchor="middle" font-size="10" fill="#656b73">passed / failed</text>
+      </g>
+
+      <!-- Flow paths -->
+      <path data-flow d="M135 42 H180" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr-blue-d)"/>
+      <path data-flow d="M310 42 H355" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr-blue-d)"/>
+      <path data-flow d="M485 42 H530" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr-blue-d)"/>
+      <path data-flow d="M595 65 V135 Q595 140 590 140" stroke="#2563eb" stroke-width="1.2" fill="none" marker-end="url(#arr-blue-d)"/>
+
+      <path data-flow d="M530 55 Q480 100 310 140" stroke="#2563eb" stroke-width="1.2" fill="none" marker-end="url(#arr-blue-d)"/>
+      <path data-flow d="M310 162 H355" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr-blue-d)"/>
+      <path data-flow d="M485 162 H530" stroke="#2563eb" stroke-width="1.5" fill="none" marker-end="url(#arr-blue-d)"/>
+
+      <!-- Labels -->
+      <text x="150" y="16" font-size="10" fill="#656b73">run WF-NNN</text>
+      <text x="320" y="16" font-size="10" fill="#656b73">公开 API</text>
+      <text x="500" y="16" font-size="10" fill="#656b73">JSON</text>
+      <text x="255" y="130" font-size="10" fill="#656b73">预期比对</text>
+      <text x="380" y="200" font-size="10" fill="#656b73">两端比对</text>
+
+      <!-- Two-driver fan indication -->
+      <g class="node" style="--i:1.5" data-node="both-drivers">
+        <rect x="170" y="70" width="150" height="22" rx="4" fill="none" stroke="#d7dce3" stroke-width="0.8" stroke-dasharray="4 3"/>
+        <text x="245" y="85" text-anchor="middle" font-size="10" fill="#9ca3af">×2（Python + Rust）</text>
+      </g>
+    </svg>
+    <figcaption>单个用例从目录选出后，同时发给两个驱动，各自产出归一化观测，经 oracle 验证再做 parity 比对。</figcaption>
+  </figure>
+  <p class="explanation"><strong>数据流的主路径</strong>是横向的四步：选中用例 → 启动两个子进程 → 调用各自框架 → 产出 JSON 观测。观测被送回 Suite 层后走两条验证路径：纵向先过 oracle——把观测与 catalog.go 里预定义的 Expected 逐字段比对；然后过 parity——把 Python 和 Rust 的观测各去掉 participant 字段后做等价比较。两条路径都通过，CaseResult 标记 passed；任何一条失败，proof 字段记录具体差异。每个子进程在同一隔离环境（临时 HOME、固定 PATH、UTC 时区、64KB 输出限制）中运行，确保观测不受宿主机配置影响。</p>
+</section>
+
+<!-- ===== 用例矩阵 ===== -->
+<section id="cases">
+  <h2>用例矩阵</h2>
+  <p>10 个必过用例覆盖了 <code>workflow-core/v1</code> 契约的全部公开能力。每个用例对 Python 和 Rust 两端都强制执行。</p>
+  <table style="width:100%;border-collapse:collapse;font-size:14px;line-height:1.6;margin-top:16px">
+    <thead>
+      <tr style="border-bottom:2px solid var(--border);text-align:left">
+        <th style="padding:8px 12px">ID</th>
+        <th style="padding:8px 12px">名称</th>
+        <th style="padding:8px 12px">标签</th>
+        <th style="padding:8px 12px">验证什么</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-001</code></td><td style="padding:6px 12px">chain_happy</td><td style="padding:6px 12px"><span class="badge">core</span></td><td style="padding:6px 12px">两节点链式执行产出一个值并进入 idle</td></tr>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-002</code></td><td style="padding:6px 12px">build_missing_start</td><td style="padding:6px 12px"><span class="badge">validation</span></td><td style="padding:6px 12px">缺少 start executor 触发验证错误</td></tr>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-003</code></td><td style="padding:6px 12px">max_iterations</td><td style="padding:6px 12px"><span class="badge">runtime</span></td><td style="padding:6px 12px">活循环超限后 fresh run 拥有独立预算</td></tr>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-004</code></td><td style="padding:6px 12px">fan_out_fan_in</td><td style="padding:6px 12px"><span class="badge">routing</span></td><td style="padding:6px 12px">一分二扇出再聚合为一个结果</td></tr>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-005</code></td><td style="padding:6px 12px">fresh_run_isolation</td><td style="padding:6px 12px"><span class="badge">state</span></td><td style="padding:6px 12px">两次 run 的 fan-in 缓冲不串</td></tr>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-006</code></td><td style="padding:6px 12px">switch_default_position</td><td style="padding:6px 12px"><span class="badge">routing</span></td><td style="padding:6px 12px">default 分支是兜底，不论声明顺序</td></tr>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-007</code></td><td style="padding:6px 12px">checkpoint_resume</td><td style="padding:6px 12px"><span class="badge">checkpoint</span></td><td style="padding:6px 12px">从检查点恢复后结果与不间断运行一致</td></tr>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-008</code></td><td style="padding:6px 12px">checkpoint_graph_mismatch</td><td style="padding:6px 12px"><span class="badge">checkpoint</span></td><td style="padding:6px 12px">图结构变更后旧检查点被拒绝</td></tr>
+      <tr style="border-bottom:1px solid var(--border)"><td style="padding:6px 12px"><code>WF-009</code></td><td style="padding:6px 12px">request_partial_response</td><td style="padding:6px 12px"><span class="badge">request</span></td><td style="padding:6px 12px">回答一个请求后另一个保持 pending</td></tr>
+      <tr><td style="padding:6px 12px"><code>WF-010</code></td><td style="padding:6px 12px">request_batch_atomicity</td><td style="padding:6px 12px"><span class="badge">request</span></td><td style="padding:6px 12px">含无效 ID 的批次整体回滚</td></tr>
+    </tbody>
+  </table>
+</section>
+
+<!-- ===== 技术栈 ===== -->
+<section id="tech-stack">
+  <h2>技术栈</h2>
+  <dl class="tech">
+    <dt>套件本体</dt><dd>Go 1.25，单二进制 CLI，零外部依赖</dd>
+    <dt>Python 驱动</dt><dd>Python 脚本，调用 <code>agent-framework</code> 公开库，asyncio 运行</dd>
+    <dt>Rust 驱动</dt><dd>Rust 二进制（Cargo 构建），调用 <code>agent-framework-rs</code> 公开库，tokio 运行</dd>
+    <dt>构建</dt><dd>justfile 统一编排：Go build + Cargo build-release</dd>
+    <dt>测试</dt><dd>Go 标准 testing（harness-only 用 fake driver），不触达真实框架</dd>
+    <dt>传输协议</dt><dd>子进程 stdin/stdout，每条恰好一个 JSON 对象，诊断走 stderr</dd>
+  </dl>
+</section>
+
+<!-- ===== 架构特征与取舍 ===== -->
+<section id="tradeoffs">
+  <h2>架构特征与取舍</h2>
+  <h3>套件不实现工作流逻辑</h3>
+  <p>驱动只翻译用例参数、调用框架 API、包装返回值。路由、检查点、迭代控制全部来自被测库——这保证了测试的保真度：如果框架行为变了，观测值一定变。</p>
+  <h3>归一化只抹不稳定字段</h3>
+  <p>生成的 UUID、时间戳、原生错误类名由驱动抹平，但 outcome、terminal_state、outputs 等业务信号保留原样。这避免了"归一化把真正的差异也抹掉"的风险。</p>
+  <h3>封闭式环境强制隔离</h3>
+  <p>子进程的 HOME 是临时目录、PATH 固定、时区锁 UTC、输出限 64KB。这套约束消除了"本地环境导致结果不同"的一整类歧义，代价是不能测试需要网络或凭据的场景。</p>
+  <h3>Parity 是逐字段 DeepEqual</h3>
+  <p>不做模糊匹配或阈值比较——两个观测必须在去掉 participant 字段后逐字节一致。这比"大致相同"严格得多，但跨语言兼容性需要这种确定性。</p>
+</section>
+
+<footer>
+  <p>生成工具：code2arch · 代码快照：agent-framework-suite · 日期：2026-08-26</p>
+  <p>如何更新：修改代码后重跑 <code>code2arch</code> 即可重新生成此页。</p>
+</footer>
+</main>
+
+<script>
+// —— 错误自收集 ——
+window.__docErrors = [];
+window.addEventListener("error", function(e) { window.__docErrors.push(String(e.message)); });
+window.addEventListener("unhandledrejection", function(e) { window.__docErrors.push(String(e.reason)); });
+var REDUCED = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+// —— 空台兜底看门狗 ——
+var ioArmed = false;
+setTimeout(function() {
+  if (!ioArmed) document.querySelectorAll("figure.anim").forEach(function(f) { f.classList.add("in-view"); });
+}, 1500);
+
+// —— 进场触发 ——
+var io = new IntersectionObserver(function(entries) {
+  for (var i = 0; i < entries.length; i++) {
+    if (entries[i].isIntersecting) { entries[i].target.classList.add("in-view"); io.unobserve(entries[i].target); }
+  }
+}, { rootMargin: "0px 0px -15% 0px" });
+document.querySelectorAll("figure.anim").forEach(function(f) { io.observe(f); });
+ioArmed = true;
+
+// —— 流粒子 ——
+var FLOW_MS = 3200;
+var flowPaths = document.querySelectorAll("[data-flow]");
+function flowDot(pathEl, dur, phase) {
+  var len = pathEl.getTotalLength();
+  var dot = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+  dot.setAttribute("r", "3.5"); dot.setAttribute("class", "flow-dot");
+  pathEl.parentNode.appendChild(dot);
+  var t0 = performance.now() - phase;
+  requestAnimationFrame(function step(t) {
+    var pt = pathEl.getPointAtLength((((t - t0) % dur) / dur) * len);
+    dot.setAttribute("cx", pt.x); dot.setAttribute("cy", pt.y);
+    requestAnimationFrame(step);
+  });
+}
+if (!REDUCED) {
+  flowPaths.forEach(function(p, i) { flowDot(p, FLOW_MS, (i * FLOW_MS) / flowPaths.length); });
+}
+
+// —— 焦点降噪 ——
+function bindHover(svg) {
+  svg.querySelectorAll("[data-node]").forEach(function(n) {
+    n.addEventListener("mouseenter", function() { setHl(svg, n.dataset.node, true); });
+    n.addEventListener("focus", function() { setHl(svg, n.dataset.node, true); });
+    n.addEventListener("mouseleave", function() { setHl(svg, n.dataset.node, false); });
+    n.addEventListener("blur", function() { setHl(svg, n.dataset.node, false); });
+  });
+}
+function adjacent(svg, a, b) {
+  if (a === b) return true;
+  return Array.from(svg.querySelectorAll(".edge-line")).some(function(e) {
+    return (e.dataset.from === a && e.dataset.to === b) || (e.dataset.from === b && e.dataset.to === a);
+  });
+}
+function setHl(svg, id, on) {
+  svg.classList.toggle("focus-mode", on);
+  svg.querySelectorAll("[data-node]").forEach(function(n) {
+    n.classList.toggle("hl", on && adjacent(svg, id, n.dataset.node));
+  });
+  svg.querySelectorAll(".edge-line").forEach(function(e) {
+    e.classList.toggle("hl", on && (e.dataset.from === id || e.dataset.to === id));
+  });
+}
+document.querySelectorAll("figure.anim svg").forEach(bindHover);
+
+// —— 图文联动 ——
+document.querySelectorAll("[data-explains]").forEach(function(n) {
+  if (!n.hasAttribute("tabindex")) n.setAttribute("tabindex", "0");
+  var go = function() {
+    var t = document.getElementById(n.dataset.explains);
+    if (!t) return;
+    t.scrollIntoView({ behavior: REDUCED ? "auto" : "smooth", block: "center" });
+    t.classList.add("flash");
+    setTimeout(function() { t.classList.remove("flash"); }, 1200);
+  };
+  n.addEventListener("click", go);
+  n.addEventListener("keydown", function(e) { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); go(); } });
+});
+
+// —— 逐步点亮 ——
+var seqTimers = new WeakMap();
+function dwell(s) {
+  return Math.max(550, Math.min(1500, 550 + (s.getAttribute("aria-label") || "").replace(/\s/g, "").length * 70));
+}
+function render(fig, n) {
+  var steps = Array.from(fig.querySelectorAll(".step"));
+  var hint = document.getElementById(fig.dataset.hint);
+  var k = Math.max(0, Math.min(n, steps.length));
+  steps.forEach(function(s, i) {
+    s.classList.toggle("done", i < k - 1);
+    s.classList.toggle("cur", i === k - 1);
+  });
+  fig.classList.toggle("ended", k >= steps.length);
+  if (hint) hint.textContent = k === 0 ? "共 " + steps.length + " 步" :
+    k >= steps.length ? "全部 " + steps.length + " 步" :
+    "第 " + k + " / " + steps.length + " 步";
+  fig.dataset.n = k;
+  return k;
+}
+function seek(fig, n) {
+  (seqTimers.get(fig) || []).forEach(clearTimeout);
+  return render(fig, n);
+}
+function playSeq(fig) {
+  var steps = Array.from(fig.querySelectorAll(".step"));
+  if (REDUCED) return seek(fig, steps.length);
+  seek(fig, 0);
+  var timers = []; seqTimers.set(fig, timers);
+  var t = 340;
+  steps.forEach(function(s, i) {
+    timers.push(setTimeout(function() { render(fig, i + 1); }, t));
+    t += dwell(s);
+  });
+}
+
+document.querySelectorAll("figure.seq").forEach(function(fig) {
+  var play = function() { playSeq(fig); };
+  var obs = new IntersectionObserver(function(entries, o) {
+    for (var i = 0; i < entries.length; i++) { if (entries[i].isIntersecting) { play(); o.unobserve(entries[i].target); } }
+  }, { rootMargin: "0px 0px -15% 0px" });
+  obs.observe(fig);
+  var btn = fig.parentNode.querySelector(".replay");
+  if (btn) btn.addEventListener("click", play);
+  fig.setAttribute("tabindex", "0");
+  fig.setAttribute("role", "group");
+  fig.addEventListener("keydown", function(e) {
+    var n = +(fig.dataset.n || 0), N = fig.querySelectorAll(".step").length;
+    var map = { ArrowRight: n + 1, ArrowLeft: n - 1, Home: 0, End: N };
+    if (!(e.key in map)) return;
+    e.preventDefault();
+    seek(fig, map[e.key]);
+  });
+  fig.querySelectorAll(".step").forEach(function(s) {
+    s.addEventListener("mouseenter", function() { s.classList.add("focus"); });
+    s.addEventListener("focus", function() { s.classList.add("focus"); });
+    s.addEventListener("mouseleave", function() { s.classList.remove("focus"); });
+    s.addEventListener("blur", function() { s.classList.remove("focus"); });
+    s.addEventListener("click", function() {
+      var h = document.getElementById(fig.dataset.hint);
+      if (h) h.textContent = "这一步：" + s.getAttribute("aria-label");
+    });
+  });
+});
+
+addEventListener("beforeprint", function() {
+  document.querySelectorAll("figure.seq").forEach(function(f) { seek(f, 999); });
+});
+
+// —— 就绪标志 ——
+window.__docReady = true;
+</script>
+<script data-code2arch-svg-text-floor>
+    (() => {
+      // Leave sub-pixel headroom above the 12px hard gate. Chromium rounds
+      // glyph boxes differently across fonts, so a nominal 12.2px target can
+      // still render as 11.98px and fail the geometry audit.
+      const minimumHeight = 12.8;
+      const repair = () => {
+        document.querySelectorAll("svg text").forEach((label) => {
+          const box = label.getBoundingClientRect();
+          if (box.height <= 0 || box.height >= minimumHeight) return;
+          const fontSize = parseFloat(getComputedStyle(label).fontSize);
+          if (!Number.isFinite(fontSize) || fontSize <= 0) return;
+          const next = Math.ceil(fontSize * minimumHeight / box.height * 10) / 10;
+          label.style.fontSize = `${next}px`;
+        });
+      };
+      repair();
+      repair();
+      requestAnimationFrame(repair);
+      setTimeout(repair, 250);
+      setTimeout(repair, 750);
+      setTimeout(repair, 1500);
+    })();
+  </script>
+  <script data-code2arch-svg-text-collision-fix>
+    (() => {
+      const visible = (element) => {
+        const style = getComputedStyle(element);
+        const box = element.getBoundingClientRect();
+        return style.display !== "none" && style.visibility !== "hidden" &&
+          Number(style.opacity || 1) > 0 && box.width > 0 && box.height > 0;
+      };
+      const area = (box) => Math.max(0, box.width) * Math.max(0, box.height);
+      const intersectionArea = (a, b) =>
+        Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) *
+        Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top));
+      const overlaps = (a, b) => {
+        if (a.parentElement === b.parentElement) return false;
+        const aBox = a.getBoundingClientRect();
+        const bBox = b.getBoundingClientRect();
+        const overlap = intersectionArea(aBox, bBox);
+        const smaller = Math.min(area(aBox), area(bBox));
+        return smaller > 0 && overlap > 2 && overlap / smaller > 0.12;
+      };
+      const isNodeText = (text, svg) => {
+        const group = text.closest("g");
+        if (!group) return false;
+        const canvas = svg.getBoundingClientRect();
+        return [...group.querySelectorAll("rect")].some((rect) => {
+          if (!visible(rect)) return false;
+          const box = rect.getBoundingClientRect();
+          const style = getComputedStyle(rect);
+          return box.width >= 28 && box.height >= 14 &&
+            box.width < canvas.width * 0.85 && box.height < canvas.height * 0.85 &&
+            style.fill !== "none" && style.fill !== "transparent" &&
+            Number(style.fillOpacity || 1) > 0;
+        });
+      };
+      const matrixValue = (matrix) =>
+        `matrix(${matrix.a} ${matrix.b} ${matrix.c} ${matrix.d} ${matrix.e} ${matrix.f})`;
+      const candidates = [
+        [0, -14], [0, 14], [-24, 0], [24, 0],
+        [0, -24], [0, 24], [-40, 0], [40, 0],
+        [-24, -16], [24, -16], [-24, 16], [24, 16],
+        [0, -36], [0, 36], [-56, 0], [56, 0]
+      ];
+
+      document.querySelectorAll("svg").forEach((svg) => {
+        for (let iteration = 0; iteration < 12; iteration += 1) {
+          const texts = [...svg.querySelectorAll("text")].filter(visible);
+          let moving = null;
+          for (let i = 0; i < texts.length && !moving; i += 1) {
+            for (let j = i + 1; j < texts.length; j += 1) {
+              if (!overlaps(texts[i], texts[j])) continue;
+              const aNode = isNodeText(texts[i], svg);
+              const bNode = isNodeText(texts[j], svg);
+              if (aNode === bNode) continue;
+              moving = aNode ? texts[j] : texts[i];
+              break;
+            }
+          }
+          if (!moving) break;
+
+          const parentMatrix = moving.parentElement.getScreenCTM();
+          if (!parentMatrix) break;
+          const scaleX = Math.hypot(parentMatrix.a, parentMatrix.b) || 1;
+          const scaleY = Math.hypot(parentMatrix.c, parentMatrix.d) || 1;
+          const consolidated = moving.transform.baseVal.consolidate();
+          const base = consolidated ? new DOMMatrix([
+            consolidated.matrix.a, consolidated.matrix.b,
+            consolidated.matrix.c, consolidated.matrix.d,
+            consolidated.matrix.e, consolidated.matrix.f
+          ]) : new DOMMatrix();
+          const original = moving.getAttribute("transform");
+          const collisionCount = () => texts.reduce(
+            (count, other) => count + (other !== moving && overlaps(moving, other) ? 1 : 0), 0
+          );
+          const before = collisionCount();
+          let best = null;
+          let bestCount = before;
+          const canvas = svg.getBoundingClientRect();
+
+          candidates.forEach(([screenX, screenY]) => {
+            const shifted = new DOMMatrix()
+              .translate(screenX / scaleX, screenY / scaleY)
+              .multiply(base);
+            moving.setAttribute("transform", matrixValue(shifted));
+            const box = moving.getBoundingClientRect();
+            const inBounds = box.left >= canvas.left + 3 && box.right <= canvas.right - 3 &&
+              box.top >= canvas.top + 3 && box.bottom <= canvas.bottom - 3;
+            const count = inBounds ? collisionCount() : before;
+            if (count < bestCount) {
+              bestCount = count;
+              best = matrixValue(shifted);
+            }
+          });
+
+          if (best) {
+            moving.setAttribute("transform", best);
+            moving.dataset.code2archCollisionRepaired = "true";
+          } else {
+            if (original === null) moving.removeAttribute("transform");
+            else moving.setAttribute("transform", original);
+            break;
+          }
+        }
+      });
+    })();
+  </script>
+  <script data-code2arch-runtime-ready>
+    window.__docReady = true;
+  </script>
+</body>
+</html>
