@@ -1,0 +1,235 @@
+{
+  "source": "/Users/junix/projects/agent-orchestration/agent-framework-suite/docs/infographics/driver-protocol-flow.tex",
+  "workdir": "/Users/junix/projects/agent-orchestration/agent-framework-suite/docs",
+  "source_sha256": "7283d3f58327e5af9bdb90f7a69f7326c17a34507eb9b6779a8734b46a952396",
+  "engine": "xelatex",
+  "engine_version": "XeTeX 3.141592653-2.6-0.999995 (TeX Live 2023)",
+  "dpi": 300,
+  "passes": 2,
+  "transparent_png": false,
+  "shell_escape": false,
+  "warnings": [],
+  "geometry": {
+    "pdf": "/var/folders/6q/xkny9rm10gqbzhz7qd0mjp5r0000gn/T/tikz-render-saewbpjd/driver-protocol-flow.pdf",
+    "page_count": 1,
+    "expected_text": "一份用例",
+    "identity_match": true,
+    "thresholds": {
+      "min_text_pt": 6.5,
+      "min_width_occupancy": 0.45,
+      "min_height_occupancy": 0.3
+    },
+    "pages": [
+      {
+        "page": 1,
+        "width_pt": 488.79,
+        "height_pt": 494.46,
+        "line_count": 60,
+        "text_extent": {
+          "left": 32.661,
+          "top": 32.802,
+          "right": 463.609,
+          "bottom": 460.216
+        },
+        "width_occupancy": 0.8817,
+        "height_occupancy": 0.8644,
+        "overlap_count": 0,
+        "overlap_examples": [],
+        "tiny_text_count": 0,
+        "tiny_text_examples": []
+      }
+    ],
+    "issues": [],
+    "pass": true
+  },
+  "composition": {
+    "pdf": "/var/folders/6q/xkny9rm10gqbzhz7qd0mjp5r0000gn/T/tikz-render-saewbpjd/driver-protocol-flow.pdf",
+    "page": {
+      "width_pt": 488.79,
+      "height_pt": 494.46
+    },
+    "counts": {
+      "blocks": 10,
+      "containers": 0,
+      "leaf_blocks": 10,
+      "connectors": 15,
+      "marks": 14,
+      "text_lines": 60,
+      "masked_labels": 0,
+      "ignored_text_regions": 0,
+      "ignored_text_blocks": 0,
+      "ignored_text_connectors": 0,
+      "ignored_presentation_fields": 0,
+      "ignored_label_backdrops": 0
+    },
+    "metrics": {
+      "connectors_per_leaf_block": 1.5,
+      "labelled_connector_ratio": 0.733,
+      "leaf_area_cv": 1.057,
+      "lattice_ratio": 0.2,
+      "container_depth": 1,
+      "min_clearance_pt": 13.2
+    },
+    "raster": {
+      "available": true,
+      "png": "/var/folders/6q/xkny9rm10gqbzhz7qd0mjp5r0000gn/T/tikz-render-saewbpjd/driver-protocol-flow.png",
+      "background_rgb": [
+        248,
+        248,
+        248
+      ],
+      "ink_density": 0.069,
+      "cell_density_cv": 0.5595,
+      "quiet_cell_fraction": 0.2222,
+      "cells": 36
+    },
+    "thresholds": {
+      "clearance_pt": 2.0,
+      "label_radius_pt": 12.0,
+      "text_padding_pt": 1.5,
+      "min_block_area_pt2": 120.0,
+      "max_block_area_ratio": 0.55,
+      "min_connector_length_pt": 8.0,
+      "min_labeled_connector_ratio": 0.6,
+      "grid_min_blocks": 6,
+      "grid_area_cv": 0.12,
+      "grid_lattice_ratio": 0.75,
+      "max_container_depth": 2,
+      "max_ink_density": 0.38,
+      "min_quiet_cell_fraction": 0.08,
+      "min_cell_density_cv": 0.35
+    },
+    "violations": [],
+    "issues": [],
+    "notes": [],
+    "pass": true
+  },
+  "svg_lint": {
+    "tool": "svg-linter 0.1.0",
+    "input_sha256": "68abd4cc5efe5f1250b705022ea05cae0dca99c8443985682366d6e9232fff12",
+    "catalog": {
+      "schema_version": "svg-linter.catalog/v1",
+      "catalog_version": "3",
+      "catalog_hash": "sha256:9079749fd5985a8f505c2a96c7d7dd90a990fb73f9f295c12620f63c338ac333"
+    },
+    "passes": {
+      "error_gate": {
+        "select": [
+          "svg/duplicate-id",
+          "svg/dangling-reference"
+        ],
+        "coverage": {
+          "evaluated": [
+            "svg/dangling-reference",
+            "svg/duplicate-id"
+          ],
+          "not_evaluated": {}
+        },
+        "counts": {},
+        "errors": 0,
+        "total": 0,
+        "viz": null
+      },
+      "hygiene_review": {
+        "select": [
+          "svg/excessive-path-complexity",
+          "svg/unused-definition",
+          "svg/external-resource",
+          "svg/raster-upscale",
+          "svg/open-filled-path"
+        ],
+        "coverage": {
+          "evaluated": [
+            "svg/excessive-path-complexity",
+            "svg/external-resource",
+            "svg/open-filled-path",
+            "svg/raster-upscale",
+            "svg/unused-definition"
+          ],
+          "not_evaluated": {}
+        },
+        "counts": {},
+        "errors": 0,
+        "total": 0,
+        "viz": null
+      },
+      "collision_review": {
+        "select": [
+          "svg/line-overlap",
+          "svg/line-crossing",
+          "svg/line-text-overlap",
+          "svg/text-text-overlap",
+          "svg/canvas-edge-clearance",
+          "svg/ambiguous-junction",
+          "svg/connector-through-shape",
+          "svg/edge-congestion",
+          "svg/filter-clipping-risk",
+          "svg/low-contrast-text"
+        ],
+        "coverage": {
+          "evaluated": [
+            "svg/ambiguous-junction",
+            "svg/canvas-edge-clearance",
+            "svg/connector-through-shape",
+            "svg/edge-congestion",
+            "svg/filter-clipping-risk",
+            "svg/line-crossing",
+            "svg/line-overlap",
+            "svg/line-text-overlap",
+            "svg/low-contrast-text",
+            "svg/text-text-overlap"
+          ],
+          "not_evaluated": {}
+        },
+        "counts": {},
+        "errors": 0,
+        "total": 0,
+        "viz": "/private/tmp/tikz-afsuite-flow/driver-protocol-flow.collision-review.png"
+      }
+    },
+    "path_font_quarantine": [
+      "svg/out-of-bounds",
+      "svg/path-self-crossing",
+      "svg/exact-duplicate-geometry",
+      "svg/outlined-text",
+      "svg/dangling-connector",
+      "svg/marker-overlap",
+      "svg/text-container-overflow",
+      "svg/text-edge-clearance",
+      "svg/shape-shape-overlap",
+      "svg/text-shape-overlap",
+      "svg/tiny-dogleg",
+      "svg/acute-connector-bend",
+      "svg/excessive-bends",
+      "svg/alignment-outlier",
+      "svg/spacing-outlier",
+      "svg/size-outlier",
+      "svg/container-padding-outlier",
+      "svg/font-style-outlier"
+    ],
+    "error_gate_clean": true,
+    "collision_findings": 0
+  },
+  "published_despite_strict_failure": false,
+  "artifacts": {
+    "pdf": {
+      "path": "/private/tmp/tikz-afsuite-flow/driver-protocol-flow.pdf",
+      "bytes": 83756
+    },
+    "png": {
+      "path": "/private/tmp/tikz-afsuite-flow/driver-protocol-flow.png",
+      "bytes": 545217,
+      "width_px": 2037,
+      "height_px": 2061,
+      "width_to_height": 0.9884
+    },
+    "svg": {
+      "path": "/private/tmp/tikz-afsuite-flow/driver-protocol-flow.svg",
+      "bytes": 654447
+    },
+    "svg_lint_viz": {
+      "path": "/private/tmp/tikz-afsuite-flow/driver-protocol-flow.collision-review.png",
+      "bytes": 111223
+    }
+  }
+}

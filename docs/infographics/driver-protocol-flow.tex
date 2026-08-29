@@ -1,0 +1,175 @@
+% driver-protocol-flow.tex — Agent Framework Suite：driver 协议与判定流程（紧凑流程图）
+% 与 docs/architecture-infographic.tex（六段式总览）互补：本图只讲一个故事——
+% 一份语言无关用例如何变成两份可比较的 workflow-core/v1 观测并归约为退出码。
+%
+% 构建（便携，无需任何外部脚本）：
+%   cd docs
+%   xelatex -interaction=nonstopmode -output-directory=infographics infographics/driver-protocol-flow.tex
+%   pdftocairo -png -r 300 -singlefile infographics/driver-protocol-flow.pdf infographics/driver-protocol-flow
+%   pdftocairo -svg infographics/driver-protocol-flow.pdf infographics/driver-protocol-flow.svg
+\documentclass[border=12pt,varwidth=16.4cm]{standalone}
+\usepackage[UTF8,fontset=none]{ctex}
+\IfFontExistsTF{Source Han Serif SC}{
+  \setmainfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setsansfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setCJKmainfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+  \setCJKsansfont[BoldFont={Source Han Serif SC Bold}]{Source Han Serif SC}
+}{
+  \PackageWarningNoLine{tikz-infographic}{Source Han Serif SC not found; using Fandol}
+  \setCJKmainfont[BoldFont={FandolSong-Bold}]{FandolSong-Regular}
+  \setCJKsansfont[BoldFont={FandolHei-Bold}]{FandolHei-Regular}
+}
+\IfFontExistsTF{Sarasa Mono SC}{
+  \setmonofont{Sarasa Mono SC}
+  \setCJKmonofont{Sarasa Mono SC}
+}{
+  \PackageWarningNoLine{tikz-infographic}{Sarasa Mono SC not found; using Fandol}
+  \setCJKmonofont{FandolFang-Regular}
+}
+
+\usepackage{xcolor}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,backgrounds,calc,fit,positioning}
+
+% ── 复用项目共享样式（docs/styles/showcase.sty，编译时以 docs/ 为工作目录）──
+% 用 \usepackage 而非 \input：\input 会让 LaTeX 报 "requested package `'" 警告。
+\usepackage{styles/showcase}
+
+% ── 本图专用样式 ────────────────────────────────────────────────────────
+\newcommand{\sublabel}{\fontsize{8}{10}\selectfont}
+\tikzset{
+  suitebox/.style={
+    showcase/node, fill=Ocean!12, draw=Ocean, line width=1pt,
+    minimum width=38mm, minimum height=12mm, text width=34mm, align=center
+  },
+  driver/.style={
+    showcase/node, fill=Sky!18, draw=Sky, line width=.9pt,
+    minimum width=34mm, minimum height=11mm, text width=30mm, align=center
+  },
+  fw/.style={
+    showcase/node, fill=Fog!60, draw=Slate!55, line width=.8pt,
+    minimum width=34mm, minimum height=11mm, text width=30mm, align=center
+  },
+  hero/.style={
+    showcase/node, fill=Teal!8, draw=Teal!60, line width=1pt,
+    minimum width=46mm, text width=42mm, align=left, inner sep=2.5mm
+  },
+  judge/.style={
+    showcase/node, fill=white, draw=Ocean!55, line width=.9pt,
+    minimum width=44mm, minimum height=10mm, text width=40mm, align=center
+  },
+  pass/.style={
+    showcase/node, fill=Teal!15, draw=Teal!60, line width=.9pt,
+    minimum width=30mm, minimum height=9mm, font=\small
+  },
+  fail/.style={
+    showcase/node, fill=Coral!12, draw=Coral!60, line width=.9pt,
+    minimum width=24mm, minimum height=9mm, font=\small
+  },
+  edgelabel/.style={font=\scriptsize, text=Slate},
+  note/.style={font=\footnotesize, text=Slate, align=left},
+  section label/.style={showcase/eyebrow, anchor=west},
+  section title/.style={showcase/title, anchor=west},
+  section desc/.style={showcase/subtitle, anchor=west},
+  legend item/.style={font=\scriptsize, text=Slate}
+}
+
+\begin{document}
+\setlength{\parindent}{0pt}
+\begin{tikzpicture}[x=1cm,y=1cm]
+
+% ── 页面背景 ──────────────────────────────────────────────────────────
+\begin{pgfonlayer}{page background}
+  \fill[Paper,rounded corners=1.5mm] (-.6,-15.3) rectangle (15.8,1.3);
+\end{pgfonlayer}
+
+% ── 标题区 ────────────────────────────────────────────────────────────
+\node[section label] at (0,0.45) {AGENT-FRAMEWORK-SUITE · DRIVER 协议与判定流程};
+\node[section title] at (0,-0.15) {一份用例，两份观测，一次比对};
+\node[section desc, text width=15.2cm] at (0,-1.15)
+  {同一个语言无关用例，经两个隔离子进程分别驱动 Python 与 Rust 框架的公开 API，
+   产出两份可比较的 workflow-core/v1 观测，再经 oracle 与 parity 双保险归约为退出码。};
+
+% ── 左列：Suite ───────────────────────────────────────────────────────
+\node[suitebox] (suite) at (2.2,-5.0)
+  {\textbf{Suite Runner}\\{\sublabel runner.go · selector.go · catalog.go（10 个 WF 用例）}};
+
+\node[note, anchor=north west, text width=4.3cm] at (0.1,-6.6)
+  {\textbf{1 · 协议握手：}\texttt{<driver> version} $\rightarrow$
+   校验 participant / driver / subject\_version。};
+\node[note, anchor=north west, text width=4.3cm] at (0.1,-8.5)
+  {\textbf{子进程环境：}临时 HOME · TZ=UTC · C.UTF-8 · NO\_COLOR=1 ·
+   stdout/stderr 各限 64KB，且只接受恰好一个 JSON 值。};
+
+% ── 隔离子进程边界（虚线分段，给连线与标签留缺口）────────────────────
+\draw[Slate!45, densely dashed, line width=.8pt] (5.1,-2.6) -- (5.1,-3.3);
+\draw[Slate!45, densely dashed, line width=.8pt] (5.1,-6.2) -- (5.1,-8.9);
+\node[edgelabel, anchor=south west] at (5.2,-2.55) {隔离子进程边界};
+
+% ── 中列：两条 driver 泳道 ───────────────────────────────────────────
+\node[driver] (py-drv) at (8.3,-3.5) {\textbf{driver.py}\\{\sublabel Python driver}};
+\node[fw]     (py-fw)  at (8.3,-5.6) {agent-framework\\{\sublabel Python 库}};
+\node[driver] (rs-drv) at (8.3,-6.8) {\textbf{main.rs}\\{\sublabel Rust driver}};
+\node[fw]     (rs-fw)  at (8.3,-8.9) {agent-framework-rs\\{\sublabel Rust 库}};
+
+% ── 右列：归一化（主角）与判定 ───────────────────────────────────────
+\node[hero] (norm) at (13.2,-5.2)
+  {\textbf{归一化观测}（workflow-core/v1）\\[2pt]
+   {\color{Coral!80!black}\textbf{抹平}}\enspace 生成 ID · 时间戳 · 原生枚举与异常名（driver 侧）\\[1pt]
+   {\color{Slate}\textbf{去掉}}\enspace participant 字段（suite 侧）\\[1pt]
+   {\color{Teal!70!black}\textbf{保留}}\enspace outcome · terminal\_state · outputs ·
+   request 标签 · checkpoint 观测 · error.category · evidence};
+
+\node[judge] (oracle) at (13.2,-8.9)
+  {\textbf{Oracle 验证}\\{\sublabel 对共享期望 reflect.DeepEqual}};
+\node[judge] (parity) at (13.2,-10.75)
+  {\textbf{Parity 比对}\\{\sublabel 去掉 participant 后逐字段}};
+
+\node[pass] (pass) at (11.6,-12.35) {passed · exit 0};
+\node[fail] (fail) at (14.3,-12.35) {failed · exit 1};
+
+% ── 连线（全部带语义标签）────────────────────────────────────────────
+% 调用：suite -> 两个 driver（穿过边界缺口）
+\draw[showcase/flow] (suite.30) -- node[sloped, above=1.5mm, edgelabel] {2 · \texttt{run CASE\_ID}} (py-drv.195);
+\draw[showcase/flow] (suite.330) -- node[sloped, above=1.5mm, edgelabel] {2 · \texttt{run CASE\_ID}} (rs-drv.165);
+
+% 公开 API：driver -> 框架库
+\draw[showcase/softflow] (py-drv) -- node[right=2.5mm, edgelabel] {公开 API} (py-fw);
+\draw[showcase/softflow] (rs-drv) -- node[right=2.5mm, edgelabel] {公开 API} (rs-fw);
+
+% 观测：driver -> 归一化（stdout 数据流）
+\draw[showcase/data] (py-drv.0) -- (norm.168);
+\draw[showcase/data] (rs-drv.0) -- (norm.192);
+\node[edgelabel, anchor=south west] at (9.7,-2.4)
+  {3 · stdout：恰好一个 JSON 观测};
+
+% 判定链
+\draw[showcase/flow] (norm) -- node[left=1.5mm, edgelabel] {4 · 逐端验证} (oracle);
+\draw[showcase/flow] (oracle) -- node[left=1.5mm, edgelabel] {5 · 两端互比} (parity);
+
+% 终态分支
+\draw[showcase/flow] (parity.220) -- node[left=2.5mm, edgelabel] {一致} (pass.north);
+\draw[showcase/error] (parity.320) -- node[right=2mm, edgelabel] {任一差异} (fail.north);
+
+% ── 另一终态（基础设施错误，不占连线）────────────────────────────────
+\node[note, anchor=north west, text width=6.6cm] at (0.1,-11.2)
+  {\textbf{另一终态：}driver 缺失、超时或输出非 JSON $\rightarrow$ exit 3
+   （基础设施错误，非 skip）；参数 / 选择子错误 $\rightarrow$ exit 2。};
+
+% ── 图例与页脚 ───────────────────────────────────────────────────────
+\draw[showcase/flow] (0.1,-13.4) -- (1.1,-13.4);
+\node[legend item, anchor=west] at (1.25,-13.4) {主流程};
+\draw[showcase/data] (2.6,-13.4) -- (3.6,-13.4);
+\node[legend item, anchor=west] at (3.75,-13.4) {观测数据流};
+\draw[showcase/softflow] (5.6,-13.4) -- (6.6,-13.4);
+\node[legend item, anchor=west] at (6.75,-13.4) {公开 API 调用};
+\draw[showcase/error] (8.9,-13.4) -- (9.9,-13.4);
+\node[legend item, anchor=west] at (10.05,-13.4) {失败路径};
+
+\node[font=\scriptsize, text=Slate, anchor=east] at (15.0,-13.9)
+  {workflow-core/v1 · hermetic：无模型、无网络、无外部凭证 · 默认 --timeout 30s};
+\node[font=\scriptsize, text=Slate, anchor=east] at (15.0,-14.4)
+  {生成日期：2026-08-29};
+
+\end{tikzpicture}
+\end{document}
