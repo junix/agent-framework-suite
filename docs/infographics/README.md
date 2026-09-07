@@ -20,7 +20,7 @@
 |---|---|
 | `contract.md` | 读者、论点、语法、尺寸 |
 | `page.svg` | 封闭双驱路径 |
-| `index.html` | 薄页，外挂 SVG，零 CDN |
+| `index.html` | 单文件页：SVG 内联，零外部引用，1200px 居中 |
 | `data/provenance.json` | 页上主张的源码锚点 |
 | `VERIFICATION.md` | 门禁与目视 |
 | `proof.png` | `rsvg-convert` 栅格校样 |
@@ -34,5 +34,5 @@ python3 docs/infographics/build.py
 rsvg-convert --width=2560 docs/infographics/page.svg -o docs/infographics/proof.png
 ```
 
-页面是外部 SVG；`index.html` 只是薄包装。
-不启动 browser-harness。
+`index.html` 内联 page.svg 字节，零外部引用；页面 1200px 居中。
+`page.svg` 仍为可重建源。不启动 browser-harness。

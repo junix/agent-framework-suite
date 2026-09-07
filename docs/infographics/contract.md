@@ -7,7 +7,7 @@
 - grammar: one directional process spine with fork/join
 - protagonist: Y-fork path — case splits to two public APIs, joins at shared expected, then parity
 - canvas: 1280 × 720 (doc-wide / slide-16x9)
-- medium: hand-placed editorial SVG; thin HTML wrapper; rsvg-convert proof
+- medium: hand-placed editorial SVG inlined into single-page index.html (1200px-centred wrapper); page.svg stays the rebuildable source; rsvg-convert proof
 - exceptions: missing participant is failure, not skip; fail branch at parity
 - code detail: function/type/file names stay in provenance; case IDs, just verbs, Python/Rust may appear
 - not this page: protocol handshake, JSON-on-stdout, normalize wipe/drop/keep, exit-code table (see driver-protocol-flow)

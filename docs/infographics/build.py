@@ -410,7 +410,10 @@ def write_utf8(path: Path, text: str) -> None:
     path.write_text(text, encoding="utf-8")
 
 
-def build_index_html() -> str:
+def build_index_html(svg: str) -> str:
+    # The page ships the SVG inline (byte-identical to page.svg, which stays
+    # the rebuildable source) so index.html has zero external references and
+    # renders 1200 CSS px wide centred (width rule, CSS-only).
     title = T["title"]
     return (
         "<!DOCTYPE html>\n"
@@ -418,12 +421,13 @@ def build_index_html() -> str:
         "<head>\n"
         '<meta charset="utf-8"/>\n'
         f"<title>{esc(title)} \u00b7 agent-framework-suite</title>\n"
-        "<style>html,body{margin:0;background:#F7F4EE} "
-        "object,img{display:block;width:100%;height:auto}</style>\n"
+        "<style>html{margin:0;background:#F7F4EE} "
+        "body{margin:0 auto;max-width:1200px;background:#F7F4EE} "
+        "svg{display:block;width:100%;height:auto}</style>\n"
         "</head>\n"
         "<body>\n"
-        f'<object data="page.svg" type="image/svg+xml" aria-label="{esc(title)}"></object>\n'
-        "</body>\n"
+        + svg
+        + "</body>\n"
         "</html>\n"
     )
 
@@ -467,7 +471,7 @@ def build_readme() -> str:
             "|---|---|",
             "| `contract.md` | \u8bfb\u8005\u3001\u8bba\u70b9\u3001\u8bed\u6cd5\u3001\u5c3a\u5bf8 |",
             "| `page.svg` | \u5c01\u95ed\u53cc\u9a71\u8def\u5f84 |",
-            "| `index.html` | \u8584\u9875\uff0c\u5916\u6302 SVG\uff0c\u96f6 CDN |",
+            "| `index.html` | \u5355\u6587\u4ef6\u9875\uff1aSVG \u5185\u8054\uff0c\u96f6\u5916\u90e8\u5f15\u7528\uff0c1200px \u5c45\u4e2d |",
             "| `data/provenance.json` | \u9875\u4e0a\u4e3b\u5f20\u7684\u6e90\u7801\u951a\u70b9 |",
             "| `VERIFICATION.md` | \u95e8\u7981\u4e0e\u76ee\u89c6 |",
             "| `proof.png` | `rsvg-convert` \u6805\u683c\u6821\u6837 |",
@@ -481,8 +485,8 @@ def build_readme() -> str:
             "rsvg-convert --width=2560 docs/infographics/page.svg -o docs/infographics/proof.png",
             "```",
             "",
-            "\u9875\u9762\u662f\u5916\u90e8 SVG\uff1b`index.html` \u53ea\u662f\u8584\u5305\u88c5\u3002",
-            "\u4e0d\u542f\u52a8 browser-harness\u3002",
+            "`index.html` \u5185\u8054 page.svg \u5b57\u8282\uff0c\u96f6\u5916\u90e8\u5f15\u7528\uff1b\u9875\u9762 1200px \u5c45\u4e2d\u3002",
+            "`page.svg` \u4ecd\u4e3a\u53ef\u91cd\u5efa\u6e90\u3002\u4e0d\u542f\u52a8 browser-harness\u3002",
             "",
         ]
     )
@@ -500,7 +504,7 @@ def build_contract() -> str:
             "- grammar: one directional process spine with fork/join",
             "- protagonist: Y-fork path \u2014 case splits to two public APIs, joins at shared expected, then parity",
             "- canvas: 1280 \u00d7 720 (doc-wide / slide-16x9)",
-            "- medium: hand-placed editorial SVG; thin HTML wrapper; rsvg-convert proof",
+            "- medium: hand-placed editorial SVG inlined into single-page index.html (1200px-centred wrapper); page.svg stays the rebuildable source; rsvg-convert proof",
             "- exceptions: missing participant is failure, not skip; fail branch at parity",
             "- code detail: function/type/file names stay in provenance; case IDs, just verbs, Python/Rust may appear",
             "- not this page: protocol handshake, JSON-on-stdout, normalize wipe/drop/keep, exit-code table (see driver-protocol-flow)",
@@ -620,7 +624,7 @@ def build_verification() -> str:
             "",
             "- Kept, not edited: `docs/architecture-infographic.tex`, `docs/architecture-infographic.svg`, `docs/architecture.html`.",
             "- Kept, not edited: `docs/infographics/driver-protocol-flow.tex` and its derived artifacts (existing explainer; protocol / normalize / exit-code thesis).",
-            "- New: Class A path spine (`page.svg` + thin `index.html` + `proof.png`). Different thesis from the explainer: path-not-catalog, thin-driver boundary.",
+            "- New: Class A path spine (`page.svg` + `index.html` with the SVG inlined + `proof.png`). Different thesis from the explainer: path-not-catalog, thin-driver boundary.",
             "",
             "## Mechanisms checked in source",
             "",
@@ -679,6 +683,32 @@ def build_verification() -> str:
             "- browser-harness / Playwright (not used; rsvg-convert only).",
             "- CJK glyph coverage under a machine without Source Han Serif SC.",
             "",
+            "## 2026-09-06 refine",
+            "",
+            "\u672c\u6b21\u7cbe\u4fee\uff08fleet-refine b01\uff09\u3002\u672c\u76ee\u5f55\u5df2\u5165\u5e93\uff08ab73aa7\uff09\uff1b\u672c\u6b21\u7cbe\u4fee\u7684\u6539\u52a8\u672a\u63d0\u4ea4\uff0c\u7531\u4e3b\u4f1a\u8bdd\u7a0d\u540e\u7edf\u4e00\u63d0\u4ea4\u3002",
+            "",
+            "### \u4fee\u590d",
+            "",
+            "- img-external-panel\uff08high\uff09\uff1aindex.html \u7531 `<object data=\"page.svg\">` \u5916\u6302\u6539\u4e3a\u5185\u8054 SVG\uff0c\u5185\u8054\u5b57\u8282\u4e0e page.svg \u4e00\u81f4\uff1bpage.svg \u4ecd\u662f\u7531 build.py \u91cd\u5efa\u7684\u6e90\u3002\u9875\u5185\u96f6\u5916\u90e8\u5f15\u7528\u3002",
+            "- width-rule\uff08med\uff09\uff1aCSS-only\uff0cbody{max-width:1200px;margin:0 auto}\u3001svg{width:100%;height:auto}\uff1bpage.svg \u753b\u5e03\u4ecd 1280\xd7720\uff0c\u51e0\u4f55\u672a\u52a8\u3002",
+            "- \u6587\u6863\u968f\u6539\uff1aREADME \u539f\u79f0\u300c\u9875\u9762\u662f\u5916\u90e8 SVG\uff1bindex.html \u53ea\u662f\u8584\u5305\u88c5\u300d\u3010\u540e\u8bc1\u4e0d\u5b9e\uff0c\u5df2\u4fee\u6b63\u3011\u2014\u2014\u73b0\u4e3a\u5185\u8054 SVG\u30011200px \u5c45\u4e2d\uff1bcontract \u7684 medium \u884c\u540c\u6b65\u6539\u4e3a\u5185\u8054\u8868\u8ff0\u3002",
+            "",
+            "### \u7f13\u529e\uff08\u6309\u672c\u6ce2\u8303\u56f4\u8bb0\u5f55\uff0c\u4e0d\u5728\u672c\u6b21\u5b9e\u73b0\uff09",
+            "",
+            "- no-claims-binding\u3001no-poison\u3001no-vacuum\u3002",
+            "- fingerprint-gaps\uff1a\u6307\u7eb9\u6269\u4e3a page.svg + index.html \u4e24\u4ea7\u7269\uff1b\u5168\u6811\u6307\u7eb9\u672a\u505a\u3002",
+            "- other\uff08\u4f4e\uff09\uff1acontract.md / VERIFICATION.md \u4ecd\u4e3a\u82f1\u6587\u3002",
+            "- form-mismatch / no-sidenote-track\uff1a\u5355\u56fe\u5f62\u6001\u4e0e\u65c1\u6ce8\u8f68\u672a\u6539\u3002",
+            "",
+            "### \u95e8\u7981\u590d\u8dd1\uff082026-09-06\uff0c\u4ed3\u5e93\u6839\u6267\u884c\uff09",
+            "",
+            "- svg-linter objective \u95e8\uff08--require-complete --fail-on error\uff09\uff1a0 \u9519\u8bef\u3002",
+            "- hygiene \u4e0e collision \u4e24\u7ec4\u590d\u67e5\uff1a\u5404 0 \u53d1\u73b0\u3002",
+            "- \u4ece index.html \u6b63\u5219\u62bd\u53d6\u5185\u8054 SVG\uff0c\u4e0e page.svg \u5b57\u8282\u4e00\u81f4\u3002",
+            "- \u53cc\u8dd1 build.py\uff1a6 \u4e2a\u4ea7\u7269\u6587\u4ef6\u5b57\u8282\u4e00\u81f4\uff08\u786e\u5b9a\u6027\uff09\u3002",
+            "- rsvg-convert --width=2560 \u91cd\u6e32\u67d3\u4e0e\u65e2\u6709 proof.png \u5b57\u8282\u4e00\u81f4\u3002",
+            "- \u9875\u9762\u4ee3\u7801\u5750\u6807\u626b\u63cf\uff08build.py \u5185\u7f6e\uff09\uff1a0 \u547d\u4e2d\u3002",
+            "",
         ]
     )
 
@@ -730,7 +760,7 @@ def main() -> None:
     assert_fits()
 
     svg = build_svg()
-    html = build_index_html()
+    html = build_index_html(svg)
     hits = page_code_sweep(svg, html)
     if hits:
         raise SystemExit(f"code coordinates leaked onto the page: {hits}")
@@ -746,10 +776,15 @@ def main() -> None:
     )
     svg_path = ROOT / "page.svg"
     digest = hashlib.sha256(svg_path.read_bytes()).hexdigest()
+    html_path = ROOT / "index.html"
+    hdigest = hashlib.sha256(html_path.read_bytes()).hexdigest()
     extra = (
         "\n## Artifact fingerprints (this build)\n\n"
         f"- page.svg SHA-256: `{digest}`\n"
         f"- page.svg bytes: {svg_path.stat().st_size}\n"
+        f"- index.html SHA-256: `{hdigest}`\n"
+        f"- index.html bytes: {html_path.stat().st_size}\n"
+        "- index.html inlines page.svg byte-identically; zero external references\n"
         "- proof.png is produced by `rsvg-convert --width=2560` (2x of 1280 x 720)\n"
         "- CJK font at render: Source Han Serif SC\n"
         "\n## Page code-coordinate sweep\n\n"

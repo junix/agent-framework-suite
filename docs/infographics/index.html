@@ -3,9 +3,67 @@
 <head>
 <meta charset="utf-8"/>
 <title>一条路径，不是目录 · agent-framework-suite</title>
-<style>html,body{margin:0;background:#F7F4EE} object,img{display:block;width:100%;height:auto}</style>
+<style>html{margin:0;background:#F7F4EE} body{margin:0 auto;max-width:1200px;background:#F7F4EE} svg{display:block;width:100%;height:auto}</style>
 </head>
 <body>
-<object data="page.svg" type="image/svg+xml" aria-label="一条路径，不是目录"></object>
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" xml:lang="zh-CN" aria-labelledby="fig-title fig-desc">
+<title id="fig-title">agent-framework-suite：一条路径，不是目录。同一用例经公开 API 分别驱动 Python 与 Rust，共用期望，强制比对。驱动不实现路由或检查点。</title>
+<desc id="fig-desc">just check 把用例分发到 Python 与 Rust。两端只调公开 API，写出观测。先对共用期望逐端核对，再强制比对。一致则通过，分叉或缺一端则失败。用例为 WF-001 至 WF-010。封闭执行，无模型、无网络。</desc>
+<defs>
+<marker id="mk-flow" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6.4" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#356A79"/></marker>
+<marker id="mk-warn" viewBox="0 0 10 8" refX="9" refY="4" markerWidth="8" markerHeight="6.4" orient="auto"><path d="M 0 0 L 10 4 L 0 8 z" fill="#E76F51"/></marker>
+</defs>
+<rect id="bg" x="0" y="0" width="1280" height="720" fill="#F7F4EE"/>
+<text x="48.0" y="52.0" font-size="12" font-weight="700" fill="#356A79" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="kicker">agent-framework-suite · Class A</text>
+<text x="48.0" y="92.0" font-size="32" font-weight="700" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="title">一条路径，不是目录</text>
+<text x="48.0" y="124.0" font-size="15" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lede-1">同一用例经公开 API 分别驱动 Python 与 Rust。</text>
+<text x="48.0" y="148.0" font-size="15" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lede-2">共用一份期望，再强制比对。驱动只翻译，不实现路由或检查点。</text>
+<text x="1232.0" y="52.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="finger">hermetic · 无模型 · 无网络</text>
+<text x="48.0" y="180.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="ids">WF-001 · WF-002 · WF-003 · WF-004 · WF-005 · WF-006 · WF-007 · WF-008 · WF-009 · WF-010</text>
+<ellipse id="zone-oracle" cx="620.0" cy="488.0" rx="66" ry="54" fill="#DDF2EC"/>
+<line id="rule-a" x1="120" y1="416.0" x2="395.0" y2="416.0" stroke="#356A79" stroke-width="1.4" stroke-dasharray="7 5"/>
+<line id="rule-b" x1="451.0" y1="416.0" x2="789.0" y2="416.0" stroke="#356A79" stroke-width="1.4" stroke-dasharray="7 5"/>
+<line id="rule-c" x1="845.0" y1="416.0" x2="1160" y2="416.0" stroke="#356A79" stroke-width="1.4" stroke-dasharray="7 5"/>
+<text x="620.0" y="404.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="bound">虚线以上只翻译；路由与检查点在库内</text>
+<path id="e-py" d="M 594.0,250.0 L 594.0,278.0 Q 594.0,286.0 586.0,286.0 L 268.0,286.0 Q 260.0,286.0 260.0,294.0 L 260.0,340.0" fill="none" stroke="#356A79" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#mk-flow)"/>
+<path id="e-rs" d="M 606.0,250.0 L 606.0,302.0 Q 606.0,310.0 614.0,310.0 L 972.0,310.0 Q 980.0,310.0 980.0,318.0 L 980.0,372.0" fill="none" stroke="#356A79" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#mk-flow)"/>
+<path id="e-py-obs" d="M 276.0,356.0 L 415.0,356.0 Q 423.0,356.0 423.0,364.0 L 423.0,480.0 Q 423.0,488.0 431.0,488.0 L 570.0,488.0" fill="none" stroke="#356A79" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#mk-flow)"/>
+<path id="e-rs-obs" d="M 964.0,388.0 L 825.0,388.0 Q 817.0,388.0 817.0,396.0 L 817.0,480.0 Q 817.0,488.0 809.0,488.0 L 670.0,488.0" fill="none" stroke="#356A79" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#mk-flow)"/>
+<path id="e-check" d="M 620.0,538.0 L 620.0,558.0" fill="none" stroke="#356A79" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#mk-flow)"/>
+<path id="e-pass" d="M 615.3,586.0 L 615.3,600.0 Q 615.3,608.0 607.3,608.0 L 485.9,608.0 Q 480.0,608.0 480.0,613.9 L 480.0,621.0" fill="none" stroke="#356A79" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" marker-end="url(#mk-flow)"/>
+<path id="e-fail" d="M 624.7,586.0 L 624.7,600.0 Q 624.7,608.0 632.7,608.0 L 754.1,608.0 Q 760.0,608.0 760.0,613.9 L 760.0,621.0" fill="none" stroke="#E76F51" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" stroke-dasharray="6 5" marker-end="url(#mk-warn)"/>
+<text x="572.0" y="236.0" font-size="13" font-weight="700" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="lab-case">用例</text>
+<text x="630.0" y="236.0" font-size="12" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-dispatch">just check · 分发同一份</text>
+<text x="242.0" y="308.0" font-size="12" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="lab-drive-py">驱动公开 API</text>
+<text x="998.0" y="332.0" font-size="12" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-drive-rs">驱动公开 API</text>
+<text x="640.0" y="328.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="lab-both">两端均为强制</text>
+<text x="435.0" y="456.0" font-size="12" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-obs-py">写出观测</text>
+<text x="829.0" y="456.0" font-size="12" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-obs-rs">写出观测</text>
+<text x="682.0" y="552.0" font-size="12" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-check">逐端核对</text>
+<text x="548.0" y="598.0" font-size="12" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-same">一致</text>
+<text x="688.0" y="598.0" font-size="12" font-weight="400" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-split">分叉</text>
+<text x="232.0" y="352.0" font-size="13" font-weight="700" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="lab-py">Python</text>
+<text x="232.0" y="370.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="lab-py-api">公开 API</text>
+<text x="1008.0" y="384.0" font-size="13" font-weight="700" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-rs">Rust</text>
+<text x="1008.0" y="402.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-rs-api">公开 API</text>
+<text x="646.0" y="577.0" font-size="13" font-weight="700" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-parity">强制比对</text>
+<text x="459.0" y="636.0" font-size="12" font-weight="700" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="lab-pass">通过</text>
+<text x="739.0" y="636.0" font-size="12" font-weight="700" fill="#17212B" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="lab-fail">失败</text>
+<text x="783.0" y="636.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="lab-miss">缺一端不是跳过</text>
+<circle id="n-case" cx="600.0" cy="232.0" r="18.0" fill="#356A79" stroke="#356A79" stroke-width="0"/>
+<text x="600.0" y="237.0" font-size="12" font-weight="700" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="num-01">01</text>
+<circle id="n-py" cx="260.0" cy="356.0" r="16.0" fill="#356A79" stroke="#356A79" stroke-width="0"/>
+<text x="260.0" y="361.0" font-size="12" font-weight="700" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="num-02">02</text>
+<circle id="n-rs" cx="980.0" cy="388.0" r="16.0" fill="#356A79" stroke="#356A79" stroke-width="0"/>
+<text x="980.0" y="393.0" font-size="12" font-weight="700" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="num-03">03</text>
+<circle id="n-oracle" cx="620.0" cy="488.0" r="50.0" fill="#356A79" stroke="#356A79" stroke-width="0"/>
+<text x="620.0" y="480.0" font-size="16" font-weight="700" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="num-04">04</text>
+<text x="620.0" y="504.0" font-size="15" font-weight="700" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="n-oracle-t">共用期望</text>
+<circle id="n-parity" cx="620.0" cy="572.0" r="14.0" fill="#356A79" stroke="#356A79" stroke-width="0"/>
+<text x="620.0" y="577.0" font-size="11" font-weight="700" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="num-05">05</text>
+<circle id="n-pass" cx="480.0" cy="632.0" r="11.0" fill="#F7F4EE" stroke="#356A79" stroke-width="1.8"/>
+<circle id="n-fail" cx="760.0" cy="632.0" r="11.0" fill="#F7F4EE" stroke="#E76F51" stroke-width="1.8"/>
+<text x="48.0" y="688.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="colophon">依据 README 与源码。代码坐标见本目录核验记录。协议细节见既有流程图。旧分层图另存。</text>
+</svg>
 </body>
 </html>
