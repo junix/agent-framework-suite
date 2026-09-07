@@ -1,0 +1,94 @@
+{
+  "thesis": "一条路径，不是目录",
+  "page_policy": "Case IDs, just verbs, and Python/Rust may appear; function/type/file names stay here",
+  "anchors": [
+    {
+      "id": "hermetic-e2e",
+      "claim": "Suite drives both installed libraries through public APIs, checks a shared oracle, then requires Python/Rust parity",
+      "file": "README.md",
+      "lines": "3-9"
+    },
+    {
+      "id": "driver-no-impl",
+      "claim": "Drivers must not implement routing, checkpointing, request tracking, or iteration behavior",
+      "file": "CONTRACT.md",
+      "lines": "24-28",
+      "protocol": "DRIVER_PROTOCOL.md:16-17"
+    },
+    {
+      "id": "shared-expected",
+      "claim": "Each case carries one Expected observation; both participants are checked against that same record",
+      "file": "internal/suite/catalog.go",
+      "lines": "20-72",
+      "oracle": "internal/suite/runner.go:76-81,105-117"
+    },
+    {
+      "id": "parity-after-oracle",
+      "claim": "After both observations exist, parity compares them with only participant removed",
+      "file": "internal/suite/runner.go",
+      "lines": "91-122",
+      "contract": "CONTRACT.md:80-88"
+    },
+    {
+      "id": "both-mandatory",
+      "claim": "Both participants are mandatory; a missing driver is infrastructure failure, not a skip",
+      "file": "README.md",
+      "lines": "35-36,45",
+      "runner": "internal/suite/runner.go:85-89",
+      "tests": "internal/suite/suite_test.go:478-491"
+    },
+    {
+      "id": "public-api-drive",
+      "claim": "Python and Rust drivers construct graphs and call library public APIs; they do not reimplement fan-out, switch, or checkpoint restore",
+      "python": "drivers/python/driver.py:76,151-154,253,280",
+      "rust": "drivers/rust/src/main.rs:102-106,199-200,312,359"
+    },
+    {
+      "id": "just-check",
+      "claim": "just check probes both drivers then runs every hermetic case",
+      "file": "justfile",
+      "lines": "52-55",
+      "readme": "README.md:16-21"
+    },
+    {
+      "id": "case-ids",
+      "claim": "Required cases are WF-001 through WF-010",
+      "file": "CASES.md",
+      "lines": "5-14",
+      "catalog": "internal/suite/catalog.go:61-71"
+    },
+    {
+      "id": "cli-verbs",
+      "claim": "Product verbs are doctor, list, run, version; just exposes doctor/list/run/check",
+      "file": "cmd/agent-framework-suite/main.go",
+      "lines": "40-53",
+      "just": "justfile:40-55"
+    },
+    {
+      "id": "hermetic-no-net",
+      "claim": "No case uses a model, network, ambient credential, or external service",
+      "file": "README.md",
+      "lines": "22"
+    }
+  ],
+  "not_on_page": [
+    "ValidateObservation",
+    "Equivalent",
+    "Observation",
+    "CaseResult",
+    "WorkflowBuilder",
+    "reflect.DeepEqual",
+    "decodeOne",
+    "runner.go",
+    "catalog.go",
+    "client.go",
+    "main.go",
+    "driver.py",
+    "main.rs",
+    "selector.go",
+    "types.go",
+    "run_from_checkpoint",
+    "add_fan_out_edges",
+    "with_checkpointing"
+  ]
+}
