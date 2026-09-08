@@ -55,5 +55,12 @@
 <text x="620.0" y="577.0" font-size="11" font-weight="700" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="num-05">05</text>
 <circle id="n-pass" cx="480.0" cy="632.0" r="11.0" fill="#F7F4EE" stroke="#356A79" stroke-width="1.8"/>
 <circle id="n-fail" cx="760.0" cy="632.0" r="11.0" fill="#F7F4EE" stroke="#E76F51" stroke-width="1.8"/>
+<text x="1232.0" y="70.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="chip-c10">声明 C10</text>
+<text x="1232.0" y="124.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="chip-c01">声明 C01</text>
+<text x="572.0" y="268.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="chip-case">声明 C07–C09</text>
+<text x="640.0" y="348.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="chip-arms">声明 C02 · C06</text>
+<text x="620.0" y="524.0" font-size="12" font-weight="400" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="chip-c03">声明 C03</text>
+<text x="596.0" y="570.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="chip-c04">声明 C04</text>
+<text x="760.0" y="660.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="chip-c05">声明 C05</text>
 <text x="48.0" y="688.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="colophon">依据 README 与源码。代码坐标见本目录核验记录。协议细节见既有流程图。旧分层图另存。</text>
 </svg>

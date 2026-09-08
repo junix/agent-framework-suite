@@ -91,12 +91,31 @@ Saturated roles on the page: Ocean (flow) and Coral (fail). Teal/Gold unused. Fa
 - rsvg-convert --width=2560 重渲染与既有 proof.png 字节一致。
 - 页面代码坐标扫描（build.py 内置）：0 命中。
 
+## 2026-09-07 refine（审计硬化）
+
+本次审计硬化（fleet-refine w2）：补齐缓办的审计机械五类。冻结证据层 data/provenance.json 字节未动（重建前后 sha256 一致）；legacy driver-protocol-flow.* 仍原样保留。改动未提交，由主会话统一提交。
+
+### 新增
+
+- no-claims-binding：页上加「声明 Cxx」随面板脚注（7 枚：C01/C10/C07–C09/C02·C06/C03/C04/C05）与页尾「声明对照表」（index.html 图下 HTML 表，C01–C10）；声明号机器登记在 data/claims.json（Cxx ↔ provenance 锚点 slug + 主张转写 + 用例号 + 数字豁免）。tools/audit_gates.py gate binding 两向校验：页上 Cxx 集合 == 登记集合（unknown/missing 均空）；claim_index 的 slug 全部存在于 provenance anchors；WF 用例号从仓库 CASES.md 重算与登记一致。
+- no-reverse-sweep（数字反扫）：gate digits 抽取读者可见投影（SVG <text>/<title>/<desc> + 去 <style> 后的 HTML 文本）的全部数字串并逐个归类。本轮 38 个 token = 声明号 19（chips 9 + 表 10）+ 用例号 14（WF-001…WF-010，C08 声明值）+ 版式序号 5；未申领数字 = 0。豁免表（data/claims.json digit_exemptions，逐条理由）：01–05 = 路径节点序号（01 用例、02/03 双驱、04 共用期望、05 强制比对），版式序号非数据主张。无年份豁免（页上无年份）。
+- no-poison（毒丸，全部注入 /tmp 一次性副本，冻结层不动）：detail 门 6 类对照（类型名/函数名/Go 文件名/Rust 文件名/.go: 与 .py: 坐标各一）6/6 命中、干净语料 0；svg-linter 客观门删去被引用的 <defs> 标记 mk-flow → rc=1、6 条 svg/dangling-reference，复原本 rc=0、0 条；claims 门双向（注入 C99 = 未知号、移除 C05 = 登记缺失）2/2 失败、复原通过；数字门注入 42 → 未申领 [42]、复原 0。运行记录 data/audit/pills-2026-09-07.json。
+- fingerprint-gaps：tools/fingerprint.py 产出全树 SHA-256 清单 fingerprints.json（数据、工具、渲染、文档全入册；文件数见清单 file_count）。恰两项豁免并在此披露理由：fingerprints.json 自身（自指不动点）、data/audit/（运行记录，门禁重跑不得改指纹）。README/VERIFICATION 引用的 64 位树内哈希均派生自该清单（gate dochash 校验；唯一白名单外部哈希 = svg-linter 0.1.0 规则目录，外部工具链非树内产物）。工具幂等：重写字节不变。
+- no-vacuum：tools/vacuum_rebuild.py——/tmp 平拷贝 → 快照 A → 删除 8 个可重建产物（page.svg、index.html、README.md、contract.md、VERIFICATION.md、data/provenance.json、data/claims.json、proof.png）→ build.py + rsvg-convert --width=2560 全链重建 → 三方字节比对 A/重建/归档：compare_files = 8 > 0，逐文件 a_eq_rebuilt 与 rebuilt_eq_archived 全真（0 文件 PASS 视为假 PASS，已防）；/tmp 副本内 fingerprint --check 通过（脱离验证）。运行记录 data/audit/vacuum-2026-09-07.json。
+
+### 门禁复跑（2026-09-07，树内工具）
+
+- tools/audit_gates.py all：7 门全绿（inline / codesweep / binding / digits / svg / fingerprint / dochash），记录 data/audit/gates-2026-09-07.json。
+- svg-linter 三组（客观 --require-complete --fail-on error / hygiene / collision）：0 错误、0 发现；三组 effective_rules 分别为 2/5/10（非空，防陈旧目录假绿）。
+- rsvg-convert 双渲染字节一致；build.py 双跑文本产物字节一致（确定性保持）。
+- 重建后必须重跑 tools/fingerprint.py 刷新清单（README 审计节已写明）。
+
 ## Artifact fingerprints (this build)
 
-- page.svg SHA-256: `b2513d295a65ed1715b6ac39d53811a8398f1a704524d9d3f7508a14d2f48774`
-- page.svg bytes: 11035
-- index.html SHA-256: `a85fcf97be0a3391a0fce9924f5d151cf6e18b4462b494fb47e10ed5673e7c80`
-- index.html bytes: 11348
+- page.svg SHA-256: `5f2ab6f821e1cc2e142d9894eaf4255a5c586270595dbb71e9d27573f6dd385e`
+- page.svg bytes: 12509
+- index.html SHA-256: `23c371640ffa05797f210ebb84f3a72b1831abb2f116529c979aeb945486b808`
+- index.html bytes: 14991
 - index.html inlines page.svg byte-identically; zero external references
 - proof.png is produced by `rsvg-convert --width=2560` (2x of 1280 x 720)
 - CJK font at render: Source Han Serif SC

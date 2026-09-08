@@ -1,0 +1,52 @@
+{
+  "thesis": "一条路径，不是目录",
+  "binding": "two-way: every Cxx on page.svg/index.html exists in claim_index; every claim_index id appears on the page (tools/audit_gates.py gate binding)",
+  "claim_index": {
+    "C01": "hermetic-e2e",
+    "C02": "driver-no-impl",
+    "C03": "shared-expected",
+    "C04": "parity-after-oracle",
+    "C05": "both-mandatory",
+    "C06": "public-api-drive",
+    "C07": "just-check",
+    "C08": "case-ids",
+    "C09": "cli-verbs",
+    "C10": "hermetic-no-net"
+  },
+  "summaries": {
+    "C01": "套件经公开 API 分别驱动两库，先对照共用期望，再强制 Python 与 Rust 一致",
+    "C02": "驱动只翻译，不实现路由、检查点、请求跟踪或迭代",
+    "C03": "每个用例恰有一份期望观测，两端对照同一份记录核对",
+    "C04": "两份观测齐备后，仅去掉参与者字段再强制比对",
+    "C05": "两端缺一不可；缺驱动属基础设施失败，不是跳过",
+    "C06": "Python 与 Rust 驱动构造图并调用库公开 API，不重实现扇出、切换或检查点恢复",
+    "C07": "just check 先探测两驱动，再跑全部封闭用例",
+    "C08": "必备用例为 WF-001 至 WF-010",
+    "C09": "产品动词为 doctor、list、run、version；just 暴露 doctor/list/run/check",
+    "C10": "任何用例都不用模型、网络、环境凭据或外部服务"
+  },
+  "expected_case_ids": [
+    "WF-001",
+    "WF-002",
+    "WF-003",
+    "WF-004",
+    "WF-005",
+    "WF-006",
+    "WF-007",
+    "WF-008",
+    "WF-009",
+    "WF-010"
+  ],
+  "digit_exemptions": [
+    {
+      "values": [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05"
+      ],
+      "reason": "path node ordinals (01 case, 02/03 drivers, 04 shared expected, 05 parity); layout ordinals, not data claims"
+    }
+  ]
+}

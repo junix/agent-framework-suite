@@ -1,0 +1,151 @@
+{
+  "date": "2026-09-07",
+  "gates": [
+    {
+      "name": "inline",
+      "ok": true,
+      "inline_bytes": 12508,
+      "page_svg_bytes": 12509,
+      "note": "index.html ships page.svg inline byte-identically; zero external references"
+    },
+    {
+      "name": "codesweep",
+      "ok": true,
+      "hits": [],
+      "corpus": "banned token list frozen in build.py page_code_sweep"
+    },
+    {
+      "name": "binding",
+      "ok": true,
+      "registry_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10"
+      ],
+      "page_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C08",
+        "C09",
+        "C10"
+      ],
+      "unknown_on_page": [],
+      "missing_from_page": [],
+      "chip_ids": [
+        "C01",
+        "C02",
+        "C03",
+        "C04",
+        "C05",
+        "C06",
+        "C07",
+        "C09",
+        "C10"
+      ],
+      "chip_unknown": [],
+      "claim_index_values_without_anchor": [],
+      "case_id_recompute": {
+        "source": "REPO/CASES.md",
+        "ok": true,
+        "expected": [
+          "WF-001",
+          "WF-002",
+          "WF-003",
+          "WF-004",
+          "WF-005",
+          "WF-006",
+          "WF-007",
+          "WF-008",
+          "WF-009",
+          "WF-010"
+        ],
+        "recomputed": [
+          "WF-001",
+          "WF-002",
+          "WF-003",
+          "WF-004",
+          "WF-005",
+          "WF-006",
+          "WF-007",
+          "WF-008",
+          "WF-009",
+          "WF-010"
+        ]
+      }
+    },
+    {
+      "name": "digits",
+      "ok": true,
+      "tokens_total": 38,
+      "claim_ids": 19,
+      "case_ids": 14,
+      "exempt_bare_digits": 5,
+      "unknown_claim_ids": [],
+      "unexpected_case_ids": [],
+      "unclaimed_digits": [],
+      "exemption_list": [
+        {
+          "values": [
+            "01",
+            "02",
+            "03",
+            "04",
+            "05"
+          ],
+          "reason": "path node ordinals (01 case, 02/03 drivers, 04 shared expected, 05 parity); layout ordinals, not data claims"
+        }
+      ]
+    },
+    {
+      "name": "svg",
+      "ok": true,
+      "groups": {
+        "objective": {
+          "rc": 0,
+          "effective": 2,
+          "findings": 0
+        },
+        "hygiene": {
+          "rc": 0,
+          "effective": 5,
+          "findings": 0
+        },
+        "collision": {
+          "rc": 0,
+          "effective": 10,
+          "findings": 0
+        }
+      },
+      "note": "real svg-linter binary from PATH; empty effective_rules would read as clean (stale catalog trap)"
+    },
+    {
+      "name": "fingerprint",
+      "ok": true,
+      "stdout": "OK fingerprints current: 18 files, tree_sha256=e735d32df97cdfe49c15b91e988ca0078cca3872e29b0053b136c90910b6395e",
+      "stderr": ""
+    },
+    {
+      "name": "dochash",
+      "ok": true,
+      "quoted_hashes": 3,
+      "violations": [],
+      "external_allowlist": {
+        "fdfd45cabf9908c69853058ca51fba80878a99d21941eebf956258a904e55bb9": "svg-linter 0.1.0 rule catalog (external toolchain binary, not a tree artifact)"
+      },
+      "note": "every tree-artifact hash quoted in README/VERIFICATION derives from fingerprints.json"
+    }
+  ],
+  "all_ok": true
+}

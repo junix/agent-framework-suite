@@ -1,0 +1,77 @@
+{
+  "date": "2026-09-07",
+  "tmp_dir": "/var/folders/6q/xkny9rm10gqbzhz7qd0mjp5r0000gn/T/afs-vacuum-pwf1ibh4",
+  "tmp_removed_after_run": true,
+  "deleted_then_regrown": [
+    "README.md",
+    "VERIFICATION.md",
+    "contract.md",
+    "data/claims.json",
+    "data/provenance.json",
+    "index.html",
+    "page.svg",
+    "proof.png"
+  ],
+  "deleted_count": 8,
+  "rebuild_commands": {
+    "build.py": {
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/var/folders/6q/xkny9rm10gqbzhz7qd0mjp5r0000gn/T/afs-vacuum-pwf1ibh4/infographics/build.py"
+      ],
+      "rc": 0
+    },
+    "rsvg-convert": {
+      "argv": [
+        "rsvg-convert",
+        "--width=2560",
+        "/var/folders/6q/xkny9rm10gqbzhz7qd0mjp5r0000gn/T/afs-vacuum-pwf1ibh4/infographics/page.svg",
+        "-o",
+        "/var/folders/6q/xkny9rm10gqbzhz7qd0mjp5r0000gn/T/afs-vacuum-pwf1ibh4/infographics/proof.png"
+      ],
+      "rc": 0
+    }
+  },
+  "compare": {
+    "page.svg": {
+      "a_eq_rebuilt": true,
+      "rebuilt_eq_archived": true
+    },
+    "index.html": {
+      "a_eq_rebuilt": true,
+      "rebuilt_eq_archived": true
+    },
+    "README.md": {
+      "a_eq_rebuilt": true,
+      "rebuilt_eq_archived": true
+    },
+    "contract.md": {
+      "a_eq_rebuilt": true,
+      "rebuilt_eq_archived": true
+    },
+    "VERIFICATION.md": {
+      "a_eq_rebuilt": true,
+      "rebuilt_eq_archived": true
+    },
+    "data/provenance.json": {
+      "a_eq_rebuilt": true,
+      "rebuilt_eq_archived": true
+    },
+    "data/claims.json": {
+      "a_eq_rebuilt": true,
+      "rebuilt_eq_archived": true
+    },
+    "proof.png": {
+      "a_eq_rebuilt": true,
+      "rebuilt_eq_archived": true
+    }
+  },
+  "compare_files": 8,
+  "false_pass_guard": "compare_files > 0 required (a 0-file PASS is a false PASS)",
+  "detached_fingerprint_check": {
+    "rc": 0,
+    "stdout": "OK fingerprints current: 18 files, tree_sha256=e735d32df97cdfe49c15b91e988ca0078cca3872e29b0053b136c90910b6395e"
+  },
+  "frozen_layer": "data sources live in build.py; legacy driver-protocol-flow.* not deleted",
+  "ok": true
+}

@@ -1,0 +1,84 @@
+{
+  "date": "2026-09-07",
+  "corpus": "throwaway /tmp copies; frozen layer untouched",
+  "pills": [
+    {
+      "gate": "codesweep",
+      "mode": "inject-into-throwaway-copy",
+      "controls": 6,
+      "caught": 6,
+      "detail": [
+        {
+          "class": "type-name",
+          "control": "ValidateObservation",
+          "flagged": true
+        },
+        {
+          "class": "function-name",
+          "control": "run_from_checkpoint",
+          "flagged": true
+        },
+        {
+          "class": "go-file-name",
+          "control": "runner.go",
+          "flagged": true
+        },
+        {
+          "class": "rust-file-name",
+          "control": "main.rs",
+          "flagged": true
+        },
+        {
+          "class": "file-line-go",
+          "control": "selector.go:42",
+          "flagged": true
+        },
+        {
+          "class": "file-line-py",
+          "control": "driver.py:76",
+          "flagged": true
+        }
+      ],
+      "clean_corpus_hits": [],
+      "ok": true
+    },
+    {
+      "gate": "svg-objective",
+      "mode": "delete-referenced-defs-id",
+      "removed_def": "mk-flow",
+      "poison_rc": 1,
+      "poison_findings": 6,
+      "poison_rules": [
+        "svg/dangling-reference"
+      ],
+      "clean_rc": 0,
+      "clean_findings": 0,
+      "ok": true
+    },
+    {
+      "gate": "binding",
+      "mode": "two-directional",
+      "unknown_id_pill": {
+        "injected": "C99",
+        "ok": true
+      },
+      "missing_id_pill": {
+        "removed": "C05",
+        "ok": true
+      },
+      "clean_ok": true,
+      "ok": true
+    },
+    {
+      "gate": "digits",
+      "mode": "inject-stray-number",
+      "injected": "42",
+      "poison_unclaimed": [
+        "42"
+      ],
+      "clean_unclaimed": [],
+      "ok": true
+    }
+  ],
+  "all_ok": true
+}

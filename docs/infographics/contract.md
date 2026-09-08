@@ -10,4 +10,5 @@
 - medium: hand-placed editorial SVG inlined into single-page index.html (1200px-centred wrapper); page.svg stays the rebuildable source; rsvg-convert proof
 - exceptions: missing participant is failure, not skip; fail branch at parity
 - code detail: function/type/file names stay in provenance; case IDs, just verbs, Python/Rust may appear
+- claims: per-panel 「声明 Cxx」 chips plus a page-end claims table; ids bound two-way to data/claims.json (tools/audit_gates.py)
 - not this page: protocol handshake, JSON-on-stdout, normalize wipe/drop/keep, exit-code table (see driver-protocol-flow)

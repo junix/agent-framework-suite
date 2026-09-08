@@ -1,0 +1,88 @@
+{
+  "algorithm": "sha256",
+  "generated_by": "tools/fingerprint.py",
+  "file_count": 18,
+  "exemptions": {
+    "files": {
+      "fingerprints.json": "self-hash fixpoint (manifest cannot hash itself)"
+    },
+    "dirs": {
+      "data/audit": "run records; gate re-runs must not change the tree fingerprint"
+    }
+  },
+  "files": {
+    "README.md": {
+      "sha256": "0895f8c20102b2f3d14414bb4d980da2f75d9f85b9bff7cce28648a993dc17ed",
+      "bytes": 2451
+    },
+    "VERIFICATION.md": {
+      "sha256": "21dd3cfe77f4822cbb67982b9535f98af77c0533fd7e8b7fbad4fce78f2019bc",
+      "bytes": 9701
+    },
+    "build.py": {
+      "sha256": "8f71c50f1ed04cc2cadd552854b19641003de1aaa168ddd85812b4315f6ed611",
+      "bytes": 49106
+    },
+    "contract.md": {
+      "sha256": "09e4cc749b19fda6639f03f1e9b783b661c9b2f970219a4e28c5b704c754acbb",
+      "bytes": 1205
+    },
+    "data/claims.json": {
+      "sha256": "831faf1a708f818906944f9119f4fc444ab96635d94ebffd6a3756c6b08958c1",
+      "bytes": 1817
+    },
+    "data/provenance.json": {
+      "sha256": "dfa40adacbfe60884dd010d91993a81dd66e53191592c5a27c212ae9008ce518",
+      "bytes": 3016
+    },
+    "driver-protocol-flow.pdf": {
+      "sha256": "d33bda417e0b40644864f5f0028f3dae6611541734a0bf6c3d8d79a3da5a3881",
+      "bytes": 83756
+    },
+    "driver-protocol-flow.png": {
+      "sha256": "4aaa4855d8197fe0db73c7693bb47c6dda28a59f7092cd0b5abae92f548ed87e",
+      "bytes": 545217
+    },
+    "driver-protocol-flow.render.json": {
+      "sha256": "69ed0dd7acafc5265a14059f5775ad5543bf0bb32e40487dbef48585f07f7c71",
+      "bytes": 6736
+    },
+    "driver-protocol-flow.svg": {
+      "sha256": "68abd4cc5efe5f1250b705022ea05cae0dca99c8443985682366d6e9232fff12",
+      "bytes": 654447
+    },
+    "driver-protocol-flow.tex": {
+      "sha256": "7283d3f58327e5af9bdb90f7a69f7326c17a34507eb9b6779a8734b46a952396",
+      "bytes": 9830
+    },
+    "driver-protocol-flow.verification.md": {
+      "sha256": "c159ceaae16af823658aa836d76d02438eebc49534a2bc4a98a19b5f15d69d33",
+      "bytes": 6253
+    },
+    "index.html": {
+      "sha256": "23c371640ffa05797f210ebb84f3a72b1831abb2f116529c979aeb945486b808",
+      "bytes": 14991
+    },
+    "page.svg": {
+      "sha256": "5f2ab6f821e1cc2e142d9894eaf4255a5c586270595dbb71e9d27573f6dd385e",
+      "bytes": 12509
+    },
+    "proof.png": {
+      "sha256": "82f90d2d9ac4a4ed1f72c2a915a4d6627a952a753c911f1c798cf4c8020b9246",
+      "bytes": 243372
+    },
+    "tools/audit_gates.py": {
+      "sha256": "a797dd05737b448b1f1f917fa2bce42a1623b0ceb99d9e57b744378ffab77366",
+      "bytes": 17126
+    },
+    "tools/fingerprint.py": {
+      "sha256": "fa2bdd9174ea375dd67efec6e186eb85f6a2077f85db8ccc83b92e7e1f1b5df6",
+      "bytes": 3319
+    },
+    "tools/vacuum_rebuild.py": {
+      "sha256": "d2720b200e9a5cdd22697705f1961253b06b138328e1cf0fea1180e667eed155",
+      "bytes": 4639
+    }
+  },
+  "tree_sha256": "e735d32df97cdfe49c15b91e988ca0078cca3872e29b0053b136c90910b6395e"
+}

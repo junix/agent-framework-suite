@@ -37,6 +37,10 @@ GOLD = "#E9C46A"
 W, H = 1280, 720
 SAFE = 48
 
+# Single source for the case-id strip AND the claims registry the audit
+# gates sweep against (drift between the two is a gate failure, by design).
+CASE_IDS = [f"WF-{i:03d}" for i in range(1, 11)]
+
 # Reader-visible Chinese as escapes. Product names and just verbs stay Latin.
 T = {
     "kicker": "agent-framework-suite \u00b7 Class A",
@@ -50,10 +54,7 @@ T = {
         "\u9a71\u52a8\u53ea\u7ffb\u8bd1\uff0c\u4e0d\u5b9e\u73b0\u8def\u7531\u6216\u68c0\u67e5\u70b9\u3002"
     ),
     "finger": "hermetic \u00b7 \u65e0\u6a21\u578b \u00b7 \u65e0\u7f51\u7edc",
-    "ids": (
-        "WF-001 \u00b7 WF-002 \u00b7 WF-003 \u00b7 WF-004 \u00b7 WF-005 \u00b7 "
-        "WF-006 \u00b7 WF-007 \u00b7 WF-008 \u00b7 WF-009 \u00b7 WF-010"
-    ),
+    "ids": " \u00b7 ".join(CASE_IDS),
     "n_case": "\u7528\u4f8b",
     "n_py": "Python",
     "n_rs": "Rust",
@@ -92,6 +93,47 @@ T = {
         "\u5c01\u95ed\u6267\u884c\uff0c\u65e0\u6a21\u578b\u3001\u65e0\u7f51\u7edc\u3002"
     ),
 }
+
+# Two-way claim binding (audit battery 2). Cxx ids are the on-page form of
+# the frozen provenance anchors; summaries paraphrase those anchors only \u2014
+# no new evidence, no new numbers. Registry lands in data/claims.json.
+CLAIMS = [
+    ("C01", "hermetic-e2e", "\u5957\u4ef6\u7ecf\u516c\u5f00 API \u5206\u522b\u9a71\u52a8\u4e24\u5e93\uff0c\u5148\u5bf9\u7167\u5171\u7528\u671f\u671b\uff0c\u518d\u5f3a\u5236 Python \u4e0e Rust \u4e00\u81f4"),
+    ("C02", "driver-no-impl", "\u9a71\u52a8\u53ea\u7ffb\u8bd1\uff0c\u4e0d\u5b9e\u73b0\u8def\u7531\u3001\u68c0\u67e5\u70b9\u3001\u8bf7\u6c42\u8ddf\u8e2a\u6216\u8fed\u4ee3"),
+    ("C03", "shared-expected", "\u6bcf\u4e2a\u7528\u4f8b\u6070\u6709\u4e00\u4efd\u671f\u671b\u89c2\u6d4b\uff0c\u4e24\u7aef\u5bf9\u7167\u540c\u4e00\u4efd\u8bb0\u5f55\u6838\u5bf9"),
+    ("C04", "parity-after-oracle", "\u4e24\u4efd\u89c2\u6d4b\u9f50\u5907\u540e\uff0c\u4ec5\u53bb\u6389\u53c2\u4e0e\u8005\u5b57\u6bb5\u518d\u5f3a\u5236\u6bd4\u5bf9"),
+    ("C05", "both-mandatory", "\u4e24\u7aef\u7f3a\u4e00\u4e0d\u53ef\uff1b\u7f3a\u9a71\u52a8\u5c5e\u57fa\u7840\u8bbe\u65bd\u5931\u8d25\uff0c\u4e0d\u662f\u8df3\u8fc7"),
+    ("C06", "public-api-drive", "Python \u4e0e Rust \u9a71\u52a8\u6784\u9020\u56fe\u5e76\u8c03\u7528\u5e93\u516c\u5f00 API\uff0c\u4e0d\u91cd\u5b9e\u73b0\u6247\u51fa\u3001\u5207\u6362\u6216\u68c0\u67e5\u70b9\u6062\u590d"),
+    ("C07", "just-check", "just check \u5148\u63a2\u6d4b\u4e24\u9a71\u52a8\uff0c\u518d\u8dd1\u5168\u90e8\u5c01\u95ed\u7528\u4f8b"),
+    ("C08", "case-ids", "\u5fc5\u5907\u7528\u4f8b\u4e3a WF-001 \u81f3 WF-010"),
+    ("C09", "cli-verbs", "\u4ea7\u54c1\u52a8\u8bcd\u4e3a doctor\u3001list\u3001run\u3001version\uff1bjust \u66b4\u9732 doctor/list/run/check"),
+    ("C10", "hermetic-no-net", "\u4efb\u4f55\u7528\u4f8b\u90fd\u4e0d\u7528\u6a21\u578b\u3001\u7f51\u7edc\u3001\u73af\u5883\u51ed\u636e\u6216\u5916\u90e8\u670d\u52a1"),
+]
+
+# Bare-digit exemption list for the reverse digit sweep. Every entry is
+# reviewed and justified here AND in VERIFICATION; the gate hard-fails on
+# any bare digit not on this list.
+DIGIT_EXEMPTIONS = [
+    {
+        "values": ["01", "02", "03", "04", "05"],
+        "reason": "path node ordinals (01 case, 02/03 drivers, 04 shared expected, 05 parity); layout ordinals, not data claims",
+    },
+]
+
+
+def claims_registry() -> dict:
+    return {
+        "thesis": T["title"],
+        "binding": (
+            "two-way: every Cxx on page.svg/index.html exists in claim_index; "
+            "every claim_index id appears on the page "
+            "(tools/audit_gates.py gate binding)"
+        ),
+        "claim_index": {cid: slug for cid, slug, _ in CLAIMS},
+        "summaries": {cid: summary for cid, _, summary in CLAIMS},
+        "expected_case_ids": CASE_IDS,
+        "digit_exemptions": DIGIT_EXEMPTIONS,
+    }
 
 
 def _font(path: Path, size: float) -> ImageFont.FreeTypeFont:
@@ -400,6 +442,18 @@ def build_svg() -> str:
     parts.append(circle(*pass_c, r_end, PAPER, OCEAN, 1.8, "n-pass"))
     parts.append(circle(*fail_c, r_end, PAPER, CORAL, 1.8, "n-fail"))
 
+    # Claim chips (audit battery 2): per-panel \u300c\u58f0\u660e Cxx\u300d footnotes bound
+    # two-way to data/claims.json. C01 lede, C10 hermetic fingerprint,
+    # C07-C09 case/dispatch/verbs, C02+C06 driver arms, C03 shared expected,
+    # C04 parity, C05 missing-participant fail note.
+    parts.append(text_el(1232, 70, "\u58f0\u660e C10", size=12, fill=SLATE, anchor="end", eid="chip-c10"))
+    parts.append(text_el(1232, 124, "\u58f0\u660e C01", size=12, fill=SLATE, anchor="end", eid="chip-c01"))
+    parts.append(text_el(572, 268, "\u58f0\u660e C07\u2013C09", size=12, fill=SLATE, anchor="end", eid="chip-case"))
+    parts.append(text_el(640, 348, "\u58f0\u660e C02 \u00b7 C06", size=12, fill=SLATE, anchor="middle", eid="chip-arms"))
+    parts.append(text_el(620, 524, "\u58f0\u660e C03", size=12, fill=PAPER, anchor="middle", eid="chip-c03"))
+    parts.append(text_el(596, 570, "\u58f0\u660e C04", size=12, fill=SLATE, anchor="end", eid="chip-c04"))
+    parts.append(text_el(760, 660, "\u58f0\u660e C05", size=12, fill=SLATE, anchor="middle", eid="chip-c05"))
+
     parts.append(text_el(SAFE, 688, T["colophon"], size=12, fill=SLATE, eid="colophon"))
     parts.append("</svg>")
     return "\n".join(parts) + "\n"
@@ -413,8 +467,13 @@ def write_utf8(path: Path, text: str) -> None:
 def build_index_html(svg: str) -> str:
     # The page ships the SVG inline (byte-identical to page.svg, which stays
     # the rebuildable source) so index.html has zero external references and
-    # renders 1200 CSS px wide centred (width rule, CSS-only).
+    # renders 1200 CSS px wide centred (width rule, CSS-only). Below the
+    # figure: the page-end claims table bound two-way to data/claims.json.
     title = T["title"]
+    rows = "\n".join(
+        f'        <tr><td class="id">{cid}</td><td>{esc(summary)}</td></tr>'
+        for cid, _, summary in CLAIMS
+    )
     return (
         "<!DOCTYPE html>\n"
         '<html lang="zh-CN">\n'
@@ -423,11 +482,29 @@ def build_index_html(svg: str) -> str:
         f"<title>{esc(title)} \u00b7 agent-framework-suite</title>\n"
         "<style>html{margin:0;background:#F7F4EE} "
         "body{margin:0 auto;max-width:1200px;background:#F7F4EE} "
-        "svg{display:block;width:100%;height:auto}</style>\n"
+        "svg{display:block;width:100%;height:auto} "
+        "section.claims{padding:24px 24px 44px} "
+        f"section.claims h2{{margin:0 0 12px;font:700 20px/1.4 {FONT_FAMILY};color:{INK}}} "
+        f"section.claims table{{border-collapse:collapse;width:100%;font:400 14px/1.6 {FONT_FAMILY};color:{INK}}} "
+        f"section.claims th,section.claims td{{border:1px solid {FOG};padding:6px 10px;text-align:left;vertical-align:top}} "
+        f"section.claims th{{background:{MINT};font-weight:700}} "
+        f"section.claims td.id{{white-space:nowrap;font-weight:700;color:{OCEAN}}} "
+        f"section.claims p.note{{margin:12px 0 0;font:400 12px/1.6 {FONT_FAMILY};color:{SLATE}}}"
+        "</style>\n"
         "</head>\n"
         "<body>\n"
         + svg
-        + "</body>\n"
+        + '<section class="claims">\n'
+        "      <h2>\u58f0\u660e\u5bf9\u7167\u8868</h2>\n"
+        "      <table>\n"
+        "        <thead><tr><th>\u58f0\u660e</th><th>\u4e3b\u5f20</th></tr></thead>\n"
+        "        <tbody>\n"
+        f"{rows}\n"
+        "        </tbody>\n"
+        "      </table>\n"
+        "      <p class=\"note\">\u5404\u58f0\u660e\u7684\u6e90\u7801\u951a\u70b9\uff08\u6587\u4ef6\u4e0e\u884c\u53f7\uff09\u89c1\u672c\u76ee\u5f55 data/provenance.json \u4e0e data/claims.json\uff1b\u4ee3\u7801\u5750\u6807\u4e0d\u4e0a\u9875\u3002</p>\n"
+        "</section>\n"
+        "</body>\n"
         "</html>\n"
     )
 
@@ -473,8 +550,14 @@ def build_readme() -> str:
             "| `page.svg` | \u5c01\u95ed\u53cc\u9a71\u8def\u5f84 |",
             "| `index.html` | \u5355\u6587\u4ef6\u9875\uff1aSVG \u5185\u8054\uff0c\u96f6\u5916\u90e8\u5f15\u7528\uff0c1200px \u5c45\u4e2d |",
             "| `data/provenance.json` | \u9875\u4e0a\u4e3b\u5f20\u7684\u6e90\u7801\u951a\u70b9 |",
+            "| `data/claims.json` | \u58f0\u660e\u53f7\u767b\u8bb0\uff1aCxx \u4e0e\u4e3b\u5f20\u3001\u7528\u4f8b\u53f7\u3001\u6570\u5b57\u8c41\u514d |",
             "| `VERIFICATION.md` | \u95e8\u7981\u4e0e\u76ee\u89c6 |",
             "| `proof.png` | `rsvg-convert` \u6805\u683c\u6821\u6837 |",
+            "| `tools/audit_gates.py` | \u5ba1\u8ba1\u95e8\uff1a\u58f0\u660e\u7ed1\u5b9a\u3001\u6570\u5b57\u53cd\u626b\u3001\u4ee3\u7801\u5750\u6807\u3001svg-linter\u3001\u6bd2\u4e38 |",
+            "| `tools/fingerprint.py` | \u5168\u6811\u6307\u7eb9\uff08\u8c41\u514d fingerprints.json \u4e0e data/audit/\uff09 |",
+            "| `tools/vacuum_rebuild.py` | \u5220\u9664\u91cd\u5efa\u5bf9\u8d26\uff08\u771f\u7a7a\u7535\u6c60\uff09 |",
+            "| `fingerprints.json` | \u5168\u6811 SHA-256 \u6e05\u5355 |",
+            "| `data/audit/` | \u95e8\u7981\u8fd0\u884c\u8bb0\u5f55\uff08\u6307\u7eb9\u8c41\u514d\uff09 |",
             "",
             "\u6539\u56fe\u65f6\u6539 `build.py` \u518d\u5199\u56de\u3002CJK \u7531 Python UTF-8 \u5199\u5165\u3002",
             "",
@@ -487,6 +570,18 @@ def build_readme() -> str:
             "",
             "`index.html` \u5185\u8054 page.svg \u5b57\u8282\uff0c\u96f6\u5916\u90e8\u5f15\u7528\uff1b\u9875\u9762 1200px \u5c45\u4e2d\u3002",
             "`page.svg` \u4ecd\u4e3a\u53ef\u91cd\u5efa\u6e90\u3002\u4e0d\u542f\u52a8 browser-harness\u3002",
+            "",
+            "## \u5ba1\u8ba1",
+            "",
+            "```bash",
+            "python3 docs/infographics/tools/audit_gates.py all --record",
+            "python3 docs/infographics/tools/audit_gates.py pills --record",
+            "python3 docs/infographics/tools/fingerprint.py",
+            "python3 docs/infographics/tools/fingerprint.py --check",
+            "python3 docs/infographics/tools/vacuum_rebuild.py",
+            "```",
+            "",
+            "\u91cd\u5efa\u540e\u5fc5\u987b\u91cd\u8dd1 `tools/fingerprint.py` \u5237\u65b0\u6e05\u5355\uff1bREADME/VERIFICATION \u5f15\u7528\u7684\u6811\u5185\u54c8\u5e0c\u4ee5 `fingerprints.json` \u4e3a\u51c6\u3002",
             "",
         ]
     )
@@ -507,6 +602,7 @@ def build_contract() -> str:
             "- medium: hand-placed editorial SVG inlined into single-page index.html (1200px-centred wrapper); page.svg stays the rebuildable source; rsvg-convert proof",
             "- exceptions: missing participant is failure, not skip; fail branch at parity",
             "- code detail: function/type/file names stay in provenance; case IDs, just verbs, Python/Rust may appear",
+            "- claims: per-panel \u300c\u58f0\u660e Cxx\u300d chips plus a page-end claims table; ids bound two-way to data/claims.json (tools/audit_gates.py)",
             "- not this page: protocol handshake, JSON-on-stdout, normalize wipe/drop/keep, exit-code table (see driver-protocol-flow)",
             "",
         ]
@@ -709,6 +805,25 @@ def build_verification() -> str:
             "- rsvg-convert --width=2560 \u91cd\u6e32\u67d3\u4e0e\u65e2\u6709 proof.png \u5b57\u8282\u4e00\u81f4\u3002",
             "- \u9875\u9762\u4ee3\u7801\u5750\u6807\u626b\u63cf\uff08build.py \u5185\u7f6e\uff09\uff1a0 \u547d\u4e2d\u3002",
             "",
+            "## 2026-09-07 refine\uff08\u5ba1\u8ba1\u786c\u5316\uff09",
+            "",
+            "\u672c\u6b21\u5ba1\u8ba1\u786c\u5316\uff08fleet-refine w2\uff09\uff1a\u8865\u9f50\u7f13\u529e\u7684\u5ba1\u8ba1\u673a\u68b0\u4e94\u7c7b\u3002\u51bb\u7ed3\u8bc1\u636e\u5c42 data/provenance.json \u5b57\u8282\u672a\u52a8\uff08\u91cd\u5efa\u524d\u540e sha256 \u4e00\u81f4\uff09\uff1blegacy driver-protocol-flow.* \u4ecd\u539f\u6837\u4fdd\u7559\u3002\u6539\u52a8\u672a\u63d0\u4ea4\uff0c\u7531\u4e3b\u4f1a\u8bdd\u7edf\u4e00\u63d0\u4ea4\u3002",
+            "",
+            "### \u65b0\u589e",
+            "",
+            "- no-claims-binding\uff1a\u9875\u4e0a\u52a0\u300c\u58f0\u660e Cxx\u300d\u968f\u9762\u677f\u811a\u6ce8\uff087 \u679a\uff1aC01/C10/C07\u2013C09/C02\u00b7C06/C03/C04/C05\uff09\u4e0e\u9875\u5c3e\u300c\u58f0\u660e\u5bf9\u7167\u8868\u300d\uff08index.html \u56fe\u4e0b HTML \u8868\uff0cC01\u2013C10\uff09\uff1b\u58f0\u660e\u53f7\u673a\u5668\u767b\u8bb0\u5728 data/claims.json\uff08Cxx \u2194 provenance \u951a\u70b9 slug + \u4e3b\u5f20\u8f6c\u5199 + \u7528\u4f8b\u53f7 + \u6570\u5b57\u8c41\u514d\uff09\u3002tools/audit_gates.py gate binding \u4e24\u5411\u6821\u9a8c\uff1a\u9875\u4e0a Cxx \u96c6\u5408 == \u767b\u8bb0\u96c6\u5408\uff08unknown/missing \u5747\u7a7a\uff09\uff1bclaim_index \u7684 slug \u5168\u90e8\u5b58\u5728\u4e8e provenance anchors\uff1bWF \u7528\u4f8b\u53f7\u4ece\u4ed3\u5e93 CASES.md \u91cd\u7b97\u4e0e\u767b\u8bb0\u4e00\u81f4\u3002",
+            "- no-reverse-sweep\uff08\u6570\u5b57\u53cd\u626b\uff09\uff1agate digits \u62bd\u53d6\u8bfb\u8005\u53ef\u89c1\u6295\u5f71\uff08SVG <text>/<title>/<desc> + \u53bb <style> \u540e\u7684 HTML \u6587\u672c\uff09\u7684\u5168\u90e8\u6570\u5b57\u4e32\u5e76\u9010\u4e2a\u5f52\u7c7b\u3002\u672c\u8f6e 38 \u4e2a token = \u58f0\u660e\u53f7 19\uff08chips 9 + \u8868 10\uff09+ \u7528\u4f8b\u53f7 14\uff08WF-001\u2026WF-010\uff0cC08 \u58f0\u660e\u503c\uff09+ \u7248\u5f0f\u5e8f\u53f7 5\uff1b\u672a\u7533\u9886\u6570\u5b57 = 0\u3002\u8c41\u514d\u8868\uff08data/claims.json digit_exemptions\uff0c\u9010\u6761\u7406\u7531\uff09\uff1a01\u201305 = \u8def\u5f84\u8282\u70b9\u5e8f\u53f7\uff0801 \u7528\u4f8b\u300102/03 \u53cc\u9a71\u300104 \u5171\u7528\u671f\u671b\u300105 \u5f3a\u5236\u6bd4\u5bf9\uff09\uff0c\u7248\u5f0f\u5e8f\u53f7\u975e\u6570\u636e\u4e3b\u5f20\u3002\u65e0\u5e74\u4efd\u8c41\u514d\uff08\u9875\u4e0a\u65e0\u5e74\u4efd\uff09\u3002",
+            "- no-poison\uff08\u6bd2\u4e38\uff0c\u5168\u90e8\u6ce8\u5165 /tmp \u4e00\u6b21\u6027\u526f\u672c\uff0c\u51bb\u7ed3\u5c42\u4e0d\u52a8\uff09\uff1adetail \u95e8 6 \u7c7b\u5bf9\u7167\uff08\u7c7b\u578b\u540d/\u51fd\u6570\u540d/Go \u6587\u4ef6\u540d/Rust \u6587\u4ef6\u540d/.go: \u4e0e .py: \u5750\u6807\u5404\u4e00\uff096/6 \u547d\u4e2d\u3001\u5e72\u51c0\u8bed\u6599 0\uff1bsvg-linter \u5ba2\u89c2\u95e8\u5220\u53bb\u88ab\u5f15\u7528\u7684 <defs> \u6807\u8bb0 mk-flow \u2192 rc=1\u30016 \u6761 svg/dangling-reference\uff0c\u590d\u539f\u672c rc=0\u30010 \u6761\uff1bclaims \u95e8\u53cc\u5411\uff08\u6ce8\u5165 C99 = \u672a\u77e5\u53f7\u3001\u79fb\u9664 C05 = \u767b\u8bb0\u7f3a\u5931\uff092/2 \u5931\u8d25\u3001\u590d\u539f\u901a\u8fc7\uff1b\u6570\u5b57\u95e8\u6ce8\u5165 42 \u2192 \u672a\u7533\u9886 [42]\u3001\u590d\u539f 0\u3002\u8fd0\u884c\u8bb0\u5f55 data/audit/pills-2026-09-07.json\u3002",
+            "- fingerprint-gaps\uff1atools/fingerprint.py \u4ea7\u51fa\u5168\u6811 SHA-256 \u6e05\u5355 fingerprints.json\uff08\u6570\u636e\u3001\u5de5\u5177\u3001\u6e32\u67d3\u3001\u6587\u6863\u5168\u5165\u518c\uff1b\u6587\u4ef6\u6570\u89c1\u6e05\u5355 file_count\uff09\u3002\u6070\u4e24\u9879\u8c41\u514d\u5e76\u5728\u6b64\u62ab\u9732\u7406\u7531\uff1afingerprints.json \u81ea\u8eab\uff08\u81ea\u6307\u4e0d\u52a8\u70b9\uff09\u3001data/audit/\uff08\u8fd0\u884c\u8bb0\u5f55\uff0c\u95e8\u7981\u91cd\u8dd1\u4e0d\u5f97\u6539\u6307\u7eb9\uff09\u3002README/VERIFICATION \u5f15\u7528\u7684 64 \u4f4d\u6811\u5185\u54c8\u5e0c\u5747\u6d3e\u751f\u81ea\u8be5\u6e05\u5355\uff08gate dochash \u6821\u9a8c\uff1b\u552f\u4e00\u767d\u540d\u5355\u5916\u90e8\u54c8\u5e0c = svg-linter 0.1.0 \u89c4\u5219\u76ee\u5f55\uff0c\u5916\u90e8\u5de5\u5177\u94fe\u975e\u6811\u5185\u4ea7\u7269\uff09\u3002\u5de5\u5177\u5e42\u7b49\uff1a\u91cd\u5199\u5b57\u8282\u4e0d\u53d8\u3002",
+            "- no-vacuum\uff1atools/vacuum_rebuild.py\u2014\u2014/tmp \u5e73\u62f7\u8d1d \u2192 \u5feb\u7167 A \u2192 \u5220\u9664 8 \u4e2a\u53ef\u91cd\u5efa\u4ea7\u7269\uff08page.svg\u3001index.html\u3001README.md\u3001contract.md\u3001VERIFICATION.md\u3001data/provenance.json\u3001data/claims.json\u3001proof.png\uff09\u2192 build.py + rsvg-convert --width=2560 \u5168\u94fe\u91cd\u5efa \u2192 \u4e09\u65b9\u5b57\u8282\u6bd4\u5bf9 A/\u91cd\u5efa/\u5f52\u6863\uff1acompare_files = 8 > 0\uff0c\u9010\u6587\u4ef6 a_eq_rebuilt \u4e0e rebuilt_eq_archived \u5168\u771f\uff080 \u6587\u4ef6 PASS \u89c6\u4e3a\u5047 PASS\uff0c\u5df2\u9632\uff09\uff1b/tmp \u526f\u672c\u5185 fingerprint --check \u901a\u8fc7\uff08\u8131\u79bb\u9a8c\u8bc1\uff09\u3002\u8fd0\u884c\u8bb0\u5f55 data/audit/vacuum-2026-09-07.json\u3002",
+            "",
+            "### \u95e8\u7981\u590d\u8dd1\uff082026-09-07\uff0c\u6811\u5185\u5de5\u5177\uff09",
+            "",
+            "- tools/audit_gates.py all\uff1a7 \u95e8\u5168\u7eff\uff08inline / codesweep / binding / digits / svg / fingerprint / dochash\uff09\uff0c\u8bb0\u5f55 data/audit/gates-2026-09-07.json\u3002",
+            "- svg-linter \u4e09\u7ec4\uff08\u5ba2\u89c2 --require-complete --fail-on error / hygiene / collision\uff09\uff1a0 \u9519\u8bef\u30010 \u53d1\u73b0\uff1b\u4e09\u7ec4 effective_rules \u5206\u522b\u4e3a 2/5/10\uff08\u975e\u7a7a\uff0c\u9632\u9648\u65e7\u76ee\u5f55\u5047\u7eff\uff09\u3002",
+            "- rsvg-convert \u53cc\u6e32\u67d3\u5b57\u8282\u4e00\u81f4\uff1bbuild.py \u53cc\u8dd1\u6587\u672c\u4ea7\u7269\u5b57\u8282\u4e00\u81f4\uff08\u786e\u5b9a\u6027\u4fdd\u6301\uff09\u3002",
+            "- \u91cd\u5efa\u540e\u5fc5\u987b\u91cd\u8dd1 tools/fingerprint.py \u5237\u65b0\u6e05\u5355\uff08README \u5ba1\u8ba1\u8282\u5df2\u5199\u660e\uff09\u3002",
+            "",
         ]
     )
 
@@ -773,6 +888,10 @@ def main() -> None:
     write_utf8(
         ROOT / "data" / "provenance.json",
         json.dumps(provenance(), ensure_ascii=False, indent=2) + "\n",
+    )
+    write_utf8(
+        ROOT / "data" / "claims.json",
+        json.dumps(claims_registry(), ensure_ascii=False, indent=2) + "\n",
     )
     svg_path = ROOT / "page.svg"
     digest = hashlib.sha256(svg_path.read_bytes()).hexdigest()

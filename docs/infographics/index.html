@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <title>一条路径，不是目录 · agent-framework-suite</title>
-<style>html{margin:0;background:#F7F4EE} body{margin:0 auto;max-width:1200px;background:#F7F4EE} svg{display:block;width:100%;height:auto}</style>
+<style>html{margin:0;background:#F7F4EE} body{margin:0 auto;max-width:1200px;background:#F7F4EE} svg{display:block;width:100%;height:auto} section.claims{padding:24px 24px 44px} section.claims h2{margin:0 0 12px;font:700 20px/1.4 Source Han Serif SC, Songti SC, serif;color:#17212B} section.claims table{border-collapse:collapse;width:100%;font:400 14px/1.6 Source Han Serif SC, Songti SC, serif;color:#17212B} section.claims th,section.claims td{border:1px solid #D9E1E3;padding:6px 10px;text-align:left;vertical-align:top} section.claims th{background:#DDF2EC;font-weight:700} section.claims td.id{white-space:nowrap;font-weight:700;color:#356A79} section.claims p.note{margin:12px 0 0;font:400 12px/1.6 Source Han Serif SC, Songti SC, serif;color:#5D6873}</style>
 </head>
 <body>
 <svg xmlns="http://www.w3.org/2000/svg" width="1280" height="720" viewBox="0 0 1280 720" role="img" xml:lang="zh-CN" aria-labelledby="fig-title fig-desc">
@@ -63,7 +63,33 @@
 <text x="620.0" y="577.0" font-size="11" font-weight="700" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="num-05">05</text>
 <circle id="n-pass" cx="480.0" cy="632.0" r="11.0" fill="#F7F4EE" stroke="#356A79" stroke-width="1.8"/>
 <circle id="n-fail" cx="760.0" cy="632.0" r="11.0" fill="#F7F4EE" stroke="#E76F51" stroke-width="1.8"/>
+<text x="1232.0" y="70.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="chip-c10">声明 C10</text>
+<text x="1232.0" y="124.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="chip-c01">声明 C01</text>
+<text x="572.0" y="268.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="chip-case">声明 C07–C09</text>
+<text x="640.0" y="348.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="chip-arms">声明 C02 · C06</text>
+<text x="620.0" y="524.0" font-size="12" font-weight="400" fill="#F7F4EE" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="chip-c03">声明 C03</text>
+<text x="596.0" y="570.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="end" dominant-baseline="alphabetic" id="chip-c04">声明 C04</text>
+<text x="760.0" y="660.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="middle" dominant-baseline="alphabetic" id="chip-c05">声明 C05</text>
 <text x="48.0" y="688.0" font-size="12" font-weight="400" fill="#5D6873" font-family="Source Han Serif SC, Songti SC, serif" text-anchor="start" dominant-baseline="alphabetic" id="colophon">依据 README 与源码。代码坐标见本目录核验记录。协议细节见既有流程图。旧分层图另存。</text>
 </svg>
+<section class="claims">
+      <h2>声明对照表</h2>
+      <table>
+        <thead><tr><th>声明</th><th>主张</th></tr></thead>
+        <tbody>
+        <tr><td class="id">C01</td><td>套件经公开 API 分别驱动两库，先对照共用期望，再强制 Python 与 Rust 一致</td></tr>
+        <tr><td class="id">C02</td><td>驱动只翻译，不实现路由、检查点、请求跟踪或迭代</td></tr>
+        <tr><td class="id">C03</td><td>每个用例恰有一份期望观测，两端对照同一份记录核对</td></tr>
+        <tr><td class="id">C04</td><td>两份观测齐备后，仅去掉参与者字段再强制比对</td></tr>
+        <tr><td class="id">C05</td><td>两端缺一不可；缺驱动属基础设施失败，不是跳过</td></tr>
+        <tr><td class="id">C06</td><td>Python 与 Rust 驱动构造图并调用库公开 API，不重实现扇出、切换或检查点恢复</td></tr>
+        <tr><td class="id">C07</td><td>just check 先探测两驱动，再跑全部封闭用例</td></tr>
+        <tr><td class="id">C08</td><td>必备用例为 WF-001 至 WF-010</td></tr>
+        <tr><td class="id">C09</td><td>产品动词为 doctor、list、run、version；just 暴露 doctor/list/run/check</td></tr>
+        <tr><td class="id">C10</td><td>任何用例都不用模型、网络、环境凭据或外部服务</td></tr>
+        </tbody>
+      </table>
+      <p class="note">各声明的源码锚点（文件与行号）见本目录 data/provenance.json 与 data/claims.json；代码坐标不上页。</p>
+</section>
 </body>
 </html>
