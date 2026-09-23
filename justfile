@@ -6,6 +6,9 @@ build_dir := suite_root / ".build"
 harness := bin_dir / "agent-framework-suite"
 rust_driver := bin_dir / "agent-framework-rs-driver"
 python_driver := suite_root / "drivers/python/agent-framework-py-driver"
+os_suffix := if os() == "macos" { "macos" } else { "linux" }
+arch_suffix := if arch() == "aarch64" { "arm64" } else { "x86" }
+install_bin := env("SYNC_BIN_DIR", home_directory() / "sync" / (os_suffix + "-" + arch_suffix + "-bin"))
 
 default:
     @just --list
@@ -21,6 +24,14 @@ build-rust-driver: prepare
     cp "{{ build_dir }}/rust-driver/release/agent-framework-rs-driver" "{{ rust_driver }}"
 
 build: build-suite build-rust-driver
+
+# Install the harness to ~/sync/<os>-<arch>-bin (ADR-749); override the whole
+# target directory with SYNC_BIN_DIR. The drivers stay in this checkout: run the
+# installed harness from the repo root, or pass --python-driver/--rust-driver.
+install: build-suite
+    mkdir -p "{{ install_bin }}"
+    @set -eu; dest="{{ install_bin }}/agent-framework-suite"; tmp="$(mktemp "{{ install_bin }}/.agent-framework-suite.XXXXXX")"; trap 'rm -f "$tmp"' EXIT; cp "{{ harness }}" "$tmp"; chmod 755 "$tmp"; if [ "$(uname -s)" = "Darwin" ]; then codesign --force --sign - "$tmp"; fi; mv -f "$tmp" "$dest"
+    echo "Installed {{ install_bin }}/agent-framework-suite"
 
 # Harness-only tests. These use fake drivers and never invoke either framework.
 test:
