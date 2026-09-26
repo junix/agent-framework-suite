@@ -5,7 +5,7 @@ edition = "2021"
 publish = false
 
 [dependencies]
-agent-framework-rs = { path = "../../../agent-framework-rs" }
+agent-framework-rs = { git = "https://github.com/junix/agent-framework-rs.git" }
 anyhow = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

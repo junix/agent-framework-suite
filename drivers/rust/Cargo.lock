@@ -5,6 +5,7 @@ version = 4
 [[package]]
 name = "agent-framework-rs"
 version = "0.1.0"
+source = "git+https://github.com/junix/agent-framework-rs.git#d595e496f303a47dfe5f29900ab48582ee06c2f4"
 dependencies = [
  "async-stream",
  "async-trait",
