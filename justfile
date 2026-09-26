@@ -9,6 +9,8 @@ python_driver := suite_root / "drivers/python/agent-framework-py-driver"
 os_suffix := if os() == "macos" { "macos" } else { "linux" }
 arch_suffix := if arch() == "aarch64" { "arm64" } else { "x86" }
 install_bin := env("SYNC_BIN_DIR", home_directory() / "sync" / (os_suffix + "-" + arch_suffix + "-bin"))
+version := "0.1.0"
+stamp := `git rev-parse --short HEAD` + `(git diff --quiet && git diff --cached --quiet) >/dev/null 2>&1 || printf .dirty`
 
 default:
     @just --list
@@ -17,7 +19,7 @@ prepare:
     mkdir -p "{{ bin_dir }}" "{{ build_dir }}"
 
 build-suite: prepare
-    go build -o "{{ harness }}" ./cmd/agent-framework-suite
+    go build -ldflags "-X main.version={{version}}+g{{stamp}}" -o "{{ harness }}" ./cmd/agent-framework-suite
 
 build-rust-driver: prepare
     CARGO_TARGET_DIR="{{ build_dir }}/rust-driver" cargo build --release --manifest-path drivers/rust/Cargo.toml

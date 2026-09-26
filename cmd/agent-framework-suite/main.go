@@ -18,7 +18,15 @@ func main() {
 	os.Exit(run(os.Args[1:], os.Stdout, os.Stderr))
 }
 
+// version carries the build stamp; the justfile build overrides it via
+// -ldflags "-X main.version=<semver>+g<sha>" (ADR-1168).
+var version = suite.SuiteVersion
+
 func run(args []string, stdout, stderr io.Writer) int {
+	if len(args) > 0 && (args[0] == "--version" || args[0] == "-v") {
+		fmt.Fprintf(stdout, "agent-framework-suite %s\n", version)
+		return 0
+	}
 	root := findRoot()
 	defaultPython, defaultRust := driver.DefaultPaths(root)
 	global := flag.NewFlagSet("agent-framework-suite", flag.ContinueOnError)
@@ -61,12 +69,12 @@ func versionCommand(args []string, stdout, stderr io.Writer) int {
 		return 2
 	}
 	if *jsonOutput {
-		if err := writeJSON(stdout, map[string]string{"suite": "agent-framework-suite", "version": suite.SuiteVersion, "contract": suite.ContractVersion}); err != nil {
+		if err := writeJSON(stdout, map[string]string{"suite": "agent-framework-suite", "version": version, "contract": suite.ContractVersion}); err != nil {
 			fmt.Fprintf(stderr, "write JSON: %v\n", err)
 			return 2
 		}
 	} else {
-		fmt.Fprintf(stdout, "agent-framework-suite %s (%s)\n", suite.SuiteVersion, suite.ContractVersion)
+		fmt.Fprintf(stdout, "agent-framework-suite %s (%s)\n", version, suite.ContractVersion)
 	}
 	return 0
 }

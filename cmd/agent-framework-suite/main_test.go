@@ -69,6 +69,19 @@ func TestVersionTextContainsVersionAndContract(t *testing.T) {
 	}
 }
 
+func TestRunVersionFlagsPrintVersionAndExitZero(t *testing.T) {
+	for _, arg := range []string{"--version", "-v"} {
+		var stdout, stderr bytes.Buffer
+		if code := run([]string{arg}, &stdout, &stderr); code != 0 {
+			t.Fatalf("run(%s) code=%d stderr=%s", arg, code, stderr.String())
+		}
+		line := strings.TrimSpace(stdout.String())
+		if !strings.HasPrefix(line, "agent-framework-suite ") || !strings.Contains(line, version) {
+			t.Fatalf("run(%s) version line=%q", arg, line)
+		}
+	}
+}
+
 func TestVersionRejectsExtraPositional(t *testing.T) {
 	var stdout, stderr bytes.Buffer
 	if code := run([]string{"version", "extra"}, &stdout, &stderr); code != 2 {
