@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -79,10 +80,20 @@ func (client Client) invoke(ctx context.Context, args ...string) (string, string
 	}
 	var stdout bytes.Buffer
 	var stderr bytes.Buffer
-	command.Stdout = &limitWriter{buffer: &stdout, remaining: streamLimit}
-	command.Stderr = &limitWriter{buffer: &stderr, remaining: streamLimit}
+	stdoutWriter := &limitWriter{buffer: &stdout, remaining: streamLimit}
+	stderrWriter := &limitWriter{buffer: &stderr, remaining: streamLimit}
+	command.Stdout = stdoutWriter
+	command.Stderr = stderrWriter
 	err = command.Run()
-	return strings.TrimSpace(stdout.String()), strings.TrimSpace(stderr.String()), err
+	diagnostic := strings.TrimSpace(stderr.String())
+	if stderrWriter.overflow {
+		diagnostic += fmt.Sprintf("\n[stderr truncated after %d bytes]", streamLimit)
+	}
+	if stdoutWriter.overflow {
+		// A retained prefix cannot prove that the complete stream is one JSON value.
+		return "", diagnostic, errors.Join(err, fmt.Errorf("stdout exceeds %d-byte output limit", streamLimit))
+	}
+	return strings.TrimSpace(stdout.String()), diagnostic, err
 }
 
 func decodeOne(raw string, target any) error {
@@ -104,10 +115,14 @@ func decodeOne(raw string, target any) error {
 type limitWriter struct {
 	buffer    *bytes.Buffer
 	remaining int
+	overflow  bool
 }
 
 func (writer *limitWriter) Write(data []byte) (int, error) {
 	original := len(data)
+	if original > writer.remaining {
+		writer.overflow = true
+	}
 	if writer.remaining > 0 {
 		if len(data) > writer.remaining {
 			data = data[:writer.remaining]
@@ -115,6 +130,7 @@ func (writer *limitWriter) Write(data []byte) (int, error) {
 		_, _ = writer.buffer.Write(data)
 		writer.remaining -= len(data)
 	}
+	// Keep draining both pipes even after overflow so the driver can finish.
 	return original, nil
 }
 
